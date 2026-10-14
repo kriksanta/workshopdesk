@@ -75,6 +75,7 @@ for(const file of ['app.js','account-install.js','attendance.js','catalog.js','s
 const hosted=fs.readFileSync(path.join(docs,'app.js'),'utf8');
 assert.ok(hosted.includes('workshopdesk:bridge-ready'));
 assert.ok(!hosted.includes('google.script.run'));
+assert.match(hosted,/renderLocal\(\);\s*restoreRemote\(\);\s*$/);
 assert.ok(fs.readFileSync(path.join(docs,'index.html'),'utf8').includes('manifest.webmanifest'));
 // HtmlService is supplied by Google in production.
 c.HtmlService={XFrameOptionsMode:{ALLOWALL:'ALLOWALL'},createHtmlOutput:source=>({setXFrameOptionsMode:()=>source})};

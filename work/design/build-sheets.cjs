@@ -10,6 +10,10 @@ let backend=fs.readFileSync(path.join(root,'server.gs'),'utf8')+'\nfunction seed
 fs.writeFileSync(path.join(out,'Code.gs'),backend);
 let app=original.replace(/const ADMIN_PASSWORD_HASH=.*?;\r?\n/,'').replace(/async function login\(form\)\{[^\n]*\}\r?\n/,'');
 app=app.replace('function render(){','function renderLocal(){\n today=day();').replace('const today=day();','let today=day();');
+// The preview ends with render(). In the connected app that would clear the
+// stored token before restoreRemote() gets a chance to read it.
+if(!/render\(\);\s*$/.test(app))throw Error('Client startup patch failed');
+app=app.replace(/render\(\);\s*$/,'renderLocal();');
 app=app.replace('function toast(', 'function toastLocal(');
 app=app.replace("case'logout':session=null;role='employer';closeModal();render();break;","case'logout':logoutRemote();break;");
 app=app.replace('Design preview · One example workflow · Changes reset on refresh','Google Sheets · Shared workshop records').replace('Google Sheets connection planned','Updates about every 8 seconds').replace('Design preview · No storage connected','Google Sheets connected');
@@ -30,7 +34,7 @@ for(const [n,source]of Object.entries(files))html=html.replace(`<script src="${n
 fs.writeFileSync(path.join(out,'Index.html'),html);
 // GitHub Pages runs the full client; the Apps Script page is only its data bridge.
 const docs=path.resolve(root,'../../docs');fs.mkdirSync(docs,{recursive:true});
-const staticHtml=read('index.html').replace('Multi-brand workshop management design preview. Jobs, inventory, attendance and billing in one place.','Jobs, inventory, attendance and billing backed by Google Sheets.').replace('<script src="attendance.js"></script>','<script src="attendance.js?v=4"></script>').replace('<script src="app.js"></script>','<script src="app.js?v=6"></script>').replace('</body>','<script>if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js"));</script></body>');
+const staticHtml=read('index.html').replace('Multi-brand workshop management design preview. Jobs, inventory, attendance and billing in one place.','Jobs, inventory, attendance and billing backed by Google Sheets.').replace('<script src="attendance.js"></script>','<script src="attendance.js?v=4"></script>').replace('<script src="app.js"></script>','<script src="app.js?v=7"></script>').replace('</body>','<script>if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js"));</script></body>');
 fs.writeFileSync(path.join(docs,'index.html'),staticHtml);
 for(const file of ['style.css','catalog.js','attendance.js','icon-192.png','icon-512.png'])fs.copyFileSync(path.join(root,'dist',file),path.join(docs,file));
 const pwaAccount=read('account-install.js').replace('This preview remembers changes only until refresh.','Saved changes are shared across your devices.').replace('Installing does not enable data storage: records and account edits still reset when the page reloads.','An internet connection is needed to read and save your Google Sheet.');

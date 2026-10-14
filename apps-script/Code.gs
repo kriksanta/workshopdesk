@@ -9,7 +9,33 @@ function initializeWorkshop() {
   }
   return setupWorkshop_();
 }
-function doGet() { return HtmlService.createHtmlOutputFromFile('Index').setTitle('Workshop Desk').addMetaTag('viewport','width=device-width, initial-scale=1'); }
+function doGet(e) {
+  const nonce=e&&e.parameter&&e.parameter.bridge;
+  if(nonce){
+    need_(/^[a-f0-9-]{36}$/.test(nonce),'Invalid bridge request.');
+    return bridgeOutput_(nonce);
+  }
+  return HtmlService.createHtmlOutputFromFile('Index').setTitle('Workshop Desk').addMetaTag('viewport','width=device-width, initial-scale=1');
+}
+function bridgeOutput_(nonce) {
+  const code=`<!doctype html><html><meta charset="utf-8"><script>
+  (()=>{
+    const origin='https://kriksanta.github.io', nonce=${JSON.stringify(nonce)};
+    const allowed=new Set(['wdLogin','wdRead','wdSave','wdLogout']);
+    const channel=new MessageChannel();
+    channel.port1.onmessage=event=>{
+      const call=event.data||{},id=call.id,name=call.name,args=call.args;
+      if(!Number.isSafeInteger(id)||!allowed.has(name)||!Array.isArray(args)){
+        channel.port1.postMessage({id,ok:false,error:'Invalid workshop request.'});return;
+      }
+      google.script.run.withSuccessHandler(result=>channel.port1.postMessage({id,ok:true,result}))
+        .withFailureHandler(error=>channel.port1.postMessage({id,ok:false,error:error&&error.message||'Google Sheets request failed.'}))[name](...args);
+    };
+    window.top.postMessage({type:'workshopdesk:bridge-ready',nonce},origin,[channel.port2]);
+  })();
+  <\/script></html>`;
+  return HtmlService.createHtmlOutput(code).setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
 function props_() { return PropertiesService.getScriptProperties(); }
 function copy_(x) { return JSON.parse(JSON.stringify(x)); }
 function canonical_(value) {

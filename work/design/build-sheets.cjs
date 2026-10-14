@@ -28,6 +28,16 @@ const files={'catalog.js':read('catalog.js'),'attendance.js':read('attendance.js
 // Apps Script's HTML processing can mistake URL slashes inside nested templates for comments.
 for(const [n,source]of Object.entries(files))html=html.replace(`<script src="${n}"></script>`,()=>'<script>'+source.replace(/https:\/\//g,'https:\\x2f\\x2f')+'</script>');
 fs.writeFileSync(path.join(out,'Index.html'),html);
+// GitHub Pages runs the full client; the Apps Script page is only its data bridge.
+const docs=path.resolve(root,'../../docs');fs.mkdirSync(docs,{recursive:true});
+const staticHtml=read('index.html').replace('Multi-brand workshop management design preview. Jobs, inventory, attendance and billing in one place.','Jobs, inventory, attendance and billing backed by Google Sheets.').replace('</body>','<script>if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js"));</script></body>');
+fs.writeFileSync(path.join(docs,'index.html'),staticHtml);
+for(const file of ['style.css','catalog.js','attendance.js','icon-192.png','icon-512.png'])fs.copyFileSync(path.join(root,'dist',file),path.join(docs,file));
+const pwaAccount=read('account-install.js').replace('This preview remembers changes only until refresh.','Saved changes are shared across your devices.').replace('Installing does not enable data storage: records and account edits still reset when the page reloads.','An internet connection is needed to read and save your Google Sheet.');
+fs.writeFileSync(path.join(docs,'account-install.js'),pwaAccount);
+const bridgeClient=fs.readFileSync(path.join(root,'sheets-bridge.js'),'utf8').replace(/^function rpc\(name,\.\.\.args\)\{.*\}\r?\n/m,'');
+if(bridgeClient.includes('google.script.run'))throw Error('PWA still calls google.script.run directly');
+fs.writeFileSync(path.join(docs,'app.js'),fs.readFileSync(path.join(root,'pwa-bridge.js'),'utf8')+'\n'+bridgeClient+'\n'+app);
 const steps=`WORKSHOP DESK — GOOGLE SHEETS SETUP
 
 Target sheet: https://docs.google.com/spreadsheets/d/REPLACE_WITH_YOUR_SPREADSHEET_ID/edit

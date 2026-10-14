@@ -43,4 +43,18 @@ assert.equal(database.state.attendance.find(a=>a.employee==='e3').status,'Pendin
 const html=fs.readFileSync(path.resolve(__dirname,'../../outputs/Google-Sheets-Setup/Index.html'),'utf8');
 const scripts=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)];assert.equal(scripts.length,4);for(const s of scripts)new vm.Script(s[1]);
 assert.ok(!html.includes('ADMIN_PASSWORD_HASH'));assert.ok(html.includes('google.script.run'));assert.ok(!html.includes('async function login(form){const d='));
+// The hosted app must contain only the connected client, and its bridge page
+// must have a valid script with a fixed origin and a small RPC allow-list.
+const docs=path.resolve(__dirname,'../../docs');
+for(const file of ['app.js','account-install.js','attendance.js','catalog.js','sw.js'])new vm.Script(fs.readFileSync(path.join(docs,file),'utf8'),{filename:file});
+const hosted=fs.readFileSync(path.join(docs,'app.js'),'utf8');
+assert.ok(hosted.includes('workshopdesk:bridge-ready'));
+assert.ok(!hosted.includes('google.script.run'));
+assert.ok(fs.readFileSync(path.join(docs,'index.html'),'utf8').includes('manifest.webmanifest'));
+// HtmlService is supplied by Google in production.
+c.HtmlService={XFrameOptionsMode:{ALLOWALL:'ALLOWALL'},createHtmlOutput:source=>({setXFrameOptionsMode:()=>source})};
+const output=c.bridgeOutput_('11111111-1111-4111-8111-111111111111');
+assert.ok(output.includes('https://kriksanta.github.io'));
+assert.ok(output.includes("['wdLogin','wdRead','wdSave','wdLogout']"));
+new vm.Script(output.match(/<script>([\s\S]*?)<\/script>/)[1]);
 console.log('PASS: login, auth isolation, stock accounting, status changes, approval-only attendance, server timestamps, password reset/revocation, revision conflicts, data preservation and shipped script syntax. Saves tested:',writes);

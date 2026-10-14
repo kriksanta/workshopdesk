@@ -12,7 +12,7 @@ let app=original.replace(/const ADMIN_PASSWORD_HASH=.*?;\r?\n/,'').replace(/asyn
 app=app.replace('function render(){','function renderLocal(){\n today=day();').replace('const today=day();','let today=day();');
 app=app.replace('function toast(', 'function toastLocal(');
 app=app.replace("case'logout':session=null;role='employer';closeModal();render();break;","case'logout':logoutRemote();break;");
-app=app.replace('Design preview · One example workflow · Changes reset on refresh','Google Sheets · Shared workshop records').replace('Google Sheets connection planned','Refreshes every 30 seconds').replace('Design preview · No storage connected','Google Sheets connected');
+app=app.replace('Design preview · One example workflow · Changes reset on refresh','Google Sheets · Shared workshop records').replace('Google Sheets connection planned','Updates about every 8 seconds').replace('Design preview · No storage connected','Google Sheets connected');
 app=app.replace('Interactive design preview','Workshop sign-in').replace('Design first. Connection later.','Your workshop, connected.').replace('Accounts and changes stay in this tab only and reset on refresh. This is a login flow preview, not secure production authentication. Google Sheets is not connected.','Sign in with your workshop account. Saved changes are shared across devices using your Google Sheet.');
 app=app.replace('Accounts last only until this page is refreshed; secure shared login will need a backend.','Accounts are checked by the server; employee passwords can be reset here.').replace('Passwords and accounts only last for this preview session; they reset on refresh.','The password is set on the server and is never stored in the spreadsheet.');
 app=app.replace('Save preview','Save settings').replace('Design mode: changes are used in this session’s documents. They are not stored and will reset on refresh.','Saved shop details appear on invoices, estimates and job cards on every device.');
@@ -24,7 +24,7 @@ account=account.replace(/function showInstallHelp\(\)\{[\s\S]*?\n\}/,`function s
 let html=read('index.html').replace('<head>','<head><base target="_top">').replace('<link rel="manifest" href="manifest.webmanifest">','');
 const icon='data:image/png;base64,'+fs.readFileSync(path.join(root,'dist/icon-192.png')).toString('base64');html=html.replaceAll('href="icon-192.png"',`href="${icon}"`);
 html=html.replace('<link rel="stylesheet" href="style.css">','<style>'+read('style.css')+'</style>');
-const files={'catalog.js':read('catalog.js'),'attendance.js':read('attendance.js'),'account-install.js':account,'app.js':fs.readFileSync(path.join(root,'sheets-bridge.js'),'utf8')+'\n'+app};
+const files={'catalog.js':read('catalog.js'),'attendance.js':read('attendance.js'),'account-install.js':account,'app.js':fs.readFileSync(path.join(root,'sheets-bridge.js'),'utf8')+'\n'+app+'\nrestoreRemote();'};
 // Apps Script's HTML processing can mistake URL slashes inside nested templates for comments.
 for(const [n,source]of Object.entries(files))html=html.replace(`<script src="${n}"></script>`,()=>'<script>'+source.replace(/https:\/\//g,'https:\\x2f\\x2f')+'</script>');
 fs.writeFileSync(path.join(out,'Index.html'),html);
@@ -37,7 +37,7 @@ const pwaAccount=read('account-install.js').replace('This preview remembers chan
 fs.writeFileSync(path.join(docs,'account-install.js'),pwaAccount);
 const bridgeClient=fs.readFileSync(path.join(root,'sheets-bridge.js'),'utf8').replace(/^function rpc\(name,\.\.\.args\)\{.*\}\r?\n/m,'');
 if(bridgeClient.includes('google.script.run'))throw Error('PWA still calls google.script.run directly');
-fs.writeFileSync(path.join(docs,'app.js'),fs.readFileSync(path.join(root,'pwa-bridge.js'),'utf8')+'\n'+bridgeClient+'\n'+app);
+fs.writeFileSync(path.join(docs,'app.js'),fs.readFileSync(path.join(root,'pwa-bridge.js'),'utf8')+'\n'+bridgeClient+'\n'+app+'\nrestoreRemote();');
 const steps=`WORKSHOP DESK — GOOGLE SHEETS SETUP
 
 Target sheet: https://docs.google.com/spreadsheets/d/REPLACE_WITH_YOUR_SPREADSHEET_ID/edit

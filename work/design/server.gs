@@ -91,18 +91,20 @@ function public_(db,user) {
   if(!user.admin){s.jobs=s.jobs.filter(j=>j.assigned===user.employee);s.attendance=s.attendance.filter(a=>a.employee===user.employee);s.requests=s.requests.filter(r=>r.employee===user.employee);s.employees=s.employees.filter(e=>e.id===user.employee);s.invoices=[];s.admin={name:'Workshop Admin',username:''};}
   return {revision:db.revision,state:s,session:{admin:!!user.admin,employee:user.employee||null}};
 }
-function auth_(token) {
+function auth_(token,db) {
   need_(typeof token==='string'&&token.length<200,'Sign in again.');
   const raw=CacheService.getScriptCache().get('session:'+digest_(token));need_(raw,'Session expired. Sign in again.');
   const u=JSON.parse(raw),cred=props_().getProperty('WD_AUTH_'+(u.admin?'admin':u.employee));
-  need_(cred&&digest_(cred)===u.signature,'Your password changed. Sign in again.');return u;
+  need_(cred&&digest_(cred)===u.signature,'Your password changed. Sign in again.');
+  if(!u.admin)need_(db.state.employees.some(e=>e.id===u.employee&&e.active!==false),'This employee account has been removed.');
+  return u;
 }
 function wdLogin(username,password) {
   return locked_(()=>{
     need_(typeof username==='string'&&username.length<=40&&typeof password==='string'&&password.length<=128,'Username or password is incorrect.');
     username=username.trim().toLowerCase();const c=CacheService.getScriptCache(),key='attempt:'+digest_(username),n=Number(c.get(key)||0),globalKey='logins:'+Math.floor(Date.now()/60000),g=Number(c.get(globalKey)||0);
     need_(n<6&&g<80,'Too many sign-in attempts. Please wait 15 minutes.');c.put(globalKey,String(g+1),60);c.put(key,String(n+1),900);
-    const db=read_(),admin=username===db.state.admin.username.toLowerCase(),e=db.state.employees.find(e=>e.phone===username);
+    const db=read_(),admin=username===db.state.admin.username.toLowerCase(),e=db.state.employees.find(e=>e.phone===username&&e.active!==false);
     const id=admin?'admin':e?.id,raw=id&&props_().getProperty('WD_AUTH_'+id),cred=raw&&JSON.parse(raw);
     need_(cred&&keyed_(cred.salt+':'+digest_(password))===cred.hash,'Username or password is incorrect.');
     c.remove(key);const token=Utilities.getUuid()+Utilities.getUuid(),u={admin,employee:admin?null:e.id,signature:digest_(raw)};
@@ -110,13 +112,14 @@ function wdLogin(username,password) {
   });
 }
 function wdLogout(token) { if(typeof token==='string')CacheService.getScriptCache().remove('session:'+digest_(token));return true; }
-function wdRead(token) {return locked_(()=>{const u=auth_(token);return public_(read_(),u);});}
+function wdRead(token) {return locked_(()=>{const db=read_(),u=auth_(token,db);return public_(db,u);});}
 function wdSave(token,revision,incoming) {
   return locked_(()=>{
-    const u=auth_(token),db=read_();need_(db.revision===revision,'Another device saved changes. Reload the latest data and try your change again.');
+    const db=read_(),u=auth_(token,db);need_(db.revision===revision,'Another device saved changes. Reload the latest data and try your change again.');
     need_(JSON.stringify(incoming).length<3000000,'Workshop data exceeds this version’s size limit.');
     const next=u.admin?copy_(incoming):employeeMerge_(db.state,incoming,u);
     validate_(next);const updates=[];
+    next.jobs.forEach(j=>{const prior=db.state.jobs.find(x=>x.id===j.id);if(!prior||prior.assigned!==j.assigned)need_(next.employees.some(e=>e.id===j.assigned&&e.active!==false),'Assign the job to an active employee.');});
     next.employees.forEach(e=>{if(e.passwordHash){need_(u.admin,'Only admin can set passwords.');updates.push([e.id,credential_(e.passwordHash)]);}delete e.passwordHash;});
     // Store data first. No password material is ever written to the spreadsheet.
     write_({revision:db.revision+1,state:next});

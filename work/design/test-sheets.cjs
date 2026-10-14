@@ -39,6 +39,17 @@ edit.attendance.push({id:'ATT-new',employee:'e3',date:'2026-10-13',in:'10:30',ou
 saved=c.wdSave(newcomer.token,newcomer.revision,edit);
 assert.equal(saved.state.attendance[0].status,'Pending');
 assert.equal(database.state.attendance.find(a=>a.employee==='e3').status,'Pending');
+// Removing an employee revokes their session and login while retaining jobs
+// and attendance so the employer can reassign work and review history.
+a=c.wdRead(admin.token);edit=clone(a.state);edit.employees.find(x=>x.id==='e3').active=false;
+saved=c.wdSave(admin.token,a.revision,edit);
+assert.ok(database.state.employees.find(x=>x.id==='e3'));
+assert.ok(database.state.attendance.some(x=>x.employee==='e3'));
+assert.throws(()=>c.wdRead(newcomer.token),/account has been removed/);
+assert.throws(()=>c.wdLogin('9000000003','new-technician-password'),/incorrect/);
+a=c.wdRead(admin.token);edit=clone(a.state);edit.employees.find(x=>x.id==='e3').active=true;
+saved=c.wdSave(admin.token,a.revision,edit);
+assert.ok(c.wdLogin('9000000003','new-technician-password').token);
 // Parse each shipped browser script, not just the source modules.
 const html=fs.readFileSync(path.resolve(__dirname,'../../outputs/Google-Sheets-Setup/Index.html'),'utf8');
 const scripts=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)];assert.equal(scripts.length,4);for(const s of scripts)new vm.Script(s[1]);

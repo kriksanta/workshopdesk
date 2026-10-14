@@ -9,7 +9,7 @@ function attendanceSummary(employeeId,month=today.slice(0,7)){
  const records=state.attendance.filter(a=>a.employee===employeeId&&a.date.startsWith(month));
  return Object.fromEntries([...ATTENDANCE_TYPES,'Pending'].map(status=>[status,records.filter(a=>a.status===status).length]));
 }
-function calendarEmployee(){return role==='employee'?currentEmployee():state.employees.some(e=>e.id===selectedAttendanceEmployee)?selectedAttendanceEmployee:state.employees[0]?.id}
+function calendarEmployee(){return role==='employee'?currentEmployee():state.employees.some(e=>e.id===selectedAttendanceEmployee)?selectedAttendanceEmployee:state.employees.find(e=>e.active!==false)?.id||state.employees[0]?.id}
 function attendancePage(){
  const id=calendarEmployee(),e=employee(id),summary=attendanceSummary(id),monthLabel=new Date(today+'T12:00:00').toLocaleDateString('en-IN',{month:'long',year:'numeric'});
  return heading(role==='employer'?'Attendance, with a clear record.':'Your month at a glance.',role==='employer'?'Approve check-ins and manage present days, leave, LOP and holidays.':'Check in, wait for approval, and see your confirmed attendance here.',role==='employer'?btn('Mark a day','add-attendance','plus','primary'):'')+
@@ -28,7 +28,7 @@ function attendanceCalendar(employeeId){
  }).join('')}</div>`;
 }
 function attendanceApprovals(){const pending=pendingAttendance();return `<section class="panel"><div class="panel-head"><div><h2>Approval requests</h2><p>Check-ins awaiting your decision.</p></div><span class="approval-count">${pending.length}</span></div><div class="panel-body">${pending.map(a=>`<div class="checkin-request"><div class="rowperson">${avatar(employee(a.employee).name)}<div><strong>${esc(employee(a.employee).name)}</strong><small>${a.date} · ${esc(a.in)} IST</small></div></div><div class="actions">${btn('Approve','approve-attendance','check','small primary',`data-id="${a.id}"`)}${btn('Reject','reject-attendance','close','small',`data-id="${a.id}"`)}</div></div>`).join('')||`<div class="empty">${icon('check')}All caught up.<br>New check-ins will appear here.</div>`}</div></section>`}
-function attendanceTable(date){return `<table><thead><tr><th>Employee</th><th>Check in</th><th>Check out</th><th>Status</th><th>Approval</th></tr></thead><tbody>${state.employees.filter(e=>role==='employer'||e.id===currentEmployee()).map(e=>{const a=attendanceRecord(e.id,date);return `<tr><td><strong>${esc(e.name)}</strong><small>${esc(a?.note||e.job)}</small></td><td>${esc(a?.in||'—')}</td><td>${esc(a?.out||'—')}</td><td>${badge(attendanceStatus(a))}</td><td>${a?.status==='Pending'?'Awaiting employer':a?.status==='Rejected'?'Rejected':a?'Confirmed by employer':'—'}</td></tr>`}).join('')}</tbody></table>`}
+function attendanceTable(date){return `<table><thead><tr><th>Employee</th><th>Check in</th><th>Check out</th><th>Status</th><th>Approval</th></tr></thead><tbody>${state.employees.filter(e=>role==='employer'?e.active!==false:e.id===currentEmployee()).map(e=>{const a=attendanceRecord(e.id,date);return `<tr><td><strong>${esc(e.name)}</strong><small>${esc(a?.note||e.job)}</small></td><td>${esc(a?.in||'—')}</td><td>${esc(a?.out||'—')}</td><td>${badge(attendanceStatus(a))}</td><td>${a?.status==='Pending'?'Awaiting employer':a?.status==='Rejected'?'Rejected':a?'Confirmed by employer':'—'}</td></tr>`}).join('')}</tbody></table>`}
 function clockPanel(){
  const a=attendanceRecord(currentEmployee(),today),pending=a?.status==='Pending',present=a?.status==='Present',closed=present&&!!a.out,marked=a&&['Leave','LOP','Holiday'].includes(a.status);
  const label=pending?'Awaiting approval':closed?'Day completed':marked?a.status:present?'Check out':a?.status==='Rejected'?'Request check-in again':'Request check-in';
@@ -54,7 +54,7 @@ function decideAttendance(id,decision){
 }
 function addAttendance(date=today,employeeId=calendarEmployee()){
  if(role!=='employer'||!session?.admin)return;
- const a=attendanceRecord(employeeId,date),options=[...state.employees.map(e=>[e.id,e.name]),['all','All employees (holiday only)']];
+ const a=attendanceRecord(employeeId,date),options=[...state.employees.filter(e=>e.active!==false||e.id===employeeId).map(e=>[e.id,e.name]),['all','All employees (holiday only)']];
  formModal('Mark attendance day',`<div class="form-grid">${selectField('Employee','employee',options,employeeId,true)}${field('Date','date',date,'date',true)}${selectField('Day status','status',ATTENDANCE_TYPES,ATTENDANCE_TYPES.includes(a?.status)?a.status:'Present')}${field('Check-in time','in',a?.in?timeInput(a.in):'','time')}${field('Check-out time (optional)','out',a?.out?timeInput(a.out):'','time')}${field('Note','note',a?.note||'','textarea',false,true)}</div><div class="info" style="margin-top:18px;margin-bottom:0">Only the employer can confirm a day. Present requires a check-in time. For Leave, LOP or Holiday, time fields are ignored. Existing status for this employee and date will be replaced.</div>`,'attendance',false,'Present · Leave · LOP (loss of pay) · Holiday');
  updateAttendanceTimeFields();
 }
@@ -68,7 +68,7 @@ function saveAttendanceForm(d){
  if(d.employee!=='all'&&!state.employees.some(e=>e.id===d.employee))return error('Choose an employee.'),false;
  if(d.status==='Present'&&(d.date>today||!/^\d{2}:\d{2}$/.test(d.in||'')))return error('Present requires a check-in time and cannot be recorded in the future.'),false;
  if(d.status==='Present'&&d.out&&d.out<d.in)return error('Check-out must be after check-in on the same day.'),false;
- const ids=d.employee==='all'?state.employees.map(e=>e.id):[d.employee];
+ const ids=d.employee==='all'?state.employees.filter(e=>e.active!==false).map(e=>e.id):[d.employee];
  ids.forEach(id=>{const old=attendanceRecord(id,d.date),record={id:old?.id||`ATT-${id}-${d.date}`,employee:id,date:d.date,status:d.status,in:d.status==='Present'?d.in:'',out:d.status==='Present'?d.out||'':'',note:d.note||'',reviewedBy:'admin',reviewedAt:new Date().toISOString()};if(old)Object.assign(old,record);else state.attendance.push(record)});
  return true;
 }

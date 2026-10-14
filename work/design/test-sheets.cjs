@@ -64,6 +64,13 @@ a=c.wdRead(admin.token);edit=clone(a.state);edit.jobs=edit.jobs.filter(x=>x.id!=
 assert.throws(()=>c.wdSave(admin.token,a.revision,edit),/issued stock/);
 a=c.wdRead(admin.token);edit=clone(a.state);edit.customers=edit.customers.filter(x=>x.id!=='c-new');
 saved=c.wdSave(admin.token,a.revision,edit);assert.ok(!database.state.customers.some(x=>x.id==='c-new'));
+// Billing deletion is employer-only, and removing a paid bill updates the
+// saved collection while leaving its job card intact.
+a=c.wdRead(admin.token);edit=clone(a.state);edit.invoices.push({id:'INV-2026-001',job:'JC-1041',type:'Invoice',date:'2026-10-13',status:'Paid',paidDate:'2026-10-13',lines:[{name:'Service',qty:1,price:100}],discount:0,tax:0});
+saved=c.wdSave(admin.token,a.revision,edit);
+e=c.wdLogin('9000000001','new-employee-password');edit=clone(e.state);edit.invoices=clone(database.state.invoices);assert.throws(()=>c.wdSave(e.token,e.revision,edit),/Employer permission/);
+a=c.wdRead(admin.token);edit=clone(a.state);edit.invoices=[];saved=c.wdSave(admin.token,a.revision,edit);
+assert.equal(database.state.invoices.length,0);assert.ok(database.state.jobs.some(x=>x.id==='JC-1041'));
 // Parse each shipped browser script, not just the source modules.
 const html=fs.readFileSync(path.resolve(__dirname,'../../outputs/Google-Sheets-Setup/Index.html'),'utf8');
 const scripts=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)];assert.equal(scripts.length,4);for(const s of scripts)new vm.Script(s[1]);

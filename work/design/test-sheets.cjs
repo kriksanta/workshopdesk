@@ -50,6 +50,20 @@ assert.throws(()=>c.wdLogin('9000000003','new-technician-password'),/incorrect/)
 a=c.wdRead(admin.token);edit=clone(a.state);edit.employees.find(x=>x.id==='e3').active=true;
 saved=c.wdSave(admin.token,a.revision,edit);
 assert.ok(c.wdLogin('9000000003','new-technician-password').token);
+// Customer phone checks normalize India's country code, and deletion keeps
+// invoiced work and issued stock intact.
+a=c.wdRead(admin.token);edit=clone(a.state);edit.customers.push({...clone(seed.customers[0]),id:'c-duplicate',phone:'9000000002'});
+assert.throws(()=>c.wdSave(admin.token,a.revision,edit),/duplicate customer phone/);
+a=c.wdRead(admin.token);edit=clone(a.state);edit.customers.push({...clone(seed.customers[0]),id:'c-new',phone:'919876543210'});
+saved=c.wdSave(admin.token,a.revision,edit);
+a=c.wdRead(admin.token);edit=clone(a.state);edit.customers.push({...clone(seed.customers[0]),id:'c-duplicate',phone:'9876543210'});
+assert.throws(()=>c.wdSave(admin.token,a.revision,edit),/duplicate customer phone/);
+a=c.wdRead(admin.token);edit=clone(a.state);edit.customers=edit.customers.filter(x=>x.id!=='c1');
+assert.throws(()=>c.wdSave(admin.token,a.revision,edit),/Invalid job assignment/);
+a=c.wdRead(admin.token);edit=clone(a.state);edit.jobs=edit.jobs.filter(x=>x.id!=='JC-1041');
+assert.throws(()=>c.wdSave(admin.token,a.revision,edit),/issued stock/);
+a=c.wdRead(admin.token);edit=clone(a.state);edit.customers=edit.customers.filter(x=>x.id!=='c-new');
+saved=c.wdSave(admin.token,a.revision,edit);assert.ok(!database.state.customers.some(x=>x.id==='c-new'));
 // Parse each shipped browser script, not just the source modules.
 const html=fs.readFileSync(path.resolve(__dirname,'../../outputs/Google-Sheets-Setup/Index.html'),'utf8');
 const scripts=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)];assert.equal(scripts.length,4);for(const s of scripts)new vm.Script(s[1]);

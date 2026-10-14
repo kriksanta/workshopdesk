@@ -119,6 +119,10 @@ function wdSave(token,revision,incoming) {
     need_(JSON.stringify(incoming).length<3000000,'Workshop data exceeds this version’s size limit.');
     const next=u.admin?copy_(incoming):employeeMerge_(db.state,incoming,u);
     validate_(next);const updates=[];
+    if(u.admin){
+      db.state.jobs.filter(j=>!next.jobs.some(x=>x.id===j.id)).forEach(j=>need_(!j.issued.length&&!db.state.invoices.some(i=>i.job===j.id),'Cannot delete a job with issued stock or billing documents.'));
+      db.state.customers.filter(c=>!next.customers.some(x=>x.id===c.id)).forEach(c=>need_(!db.state.jobs.some(j=>j.customer===c.id&&next.jobs.some(x=>x.id===j.id)),'Delete customer job cards first.'));
+    }
     next.jobs.forEach(j=>{const prior=db.state.jobs.find(x=>x.id===j.id);if(!prior||prior.assigned!==j.assigned)need_(next.employees.some(e=>e.id===j.assigned&&e.active!==false),'Assign the job to an active employee.');});
     next.employees.forEach(e=>{if(e.passwordHash){need_(u.admin,'Only admin can set passwords.');updates.push([e.id,credential_(e.passwordHash)]);}delete e.passwordHash;});
     // Store data first. No password material is ever written to the spreadsheet.
@@ -137,7 +141,7 @@ function validate_(s) {
   const amount=n=>typeof n==='number'&&Number.isFinite(n)&&n>=0&&n<=1e9;
   const date=d=>/^\d{4}-\d{2}-\d{2}$/.test(d)&&!isNaN(Date.parse(d));
   const phones=new Set();s.employees.forEach(e=>{need_(e.name&&/^\d{10,15}$/.test(e.phone)&&!phones.has(e.phone),'Invalid or duplicate employee phone.');phones.add(e.phone);});
-  s.customers.forEach(c=>need_(c.name&&/^\d{10,15}$/.test(c.phone),'Invalid customer.'));
+  const customerPhones=new Set();s.customers.forEach(c=>{const digits=String(c.phone||'').replace(/\D/g,''),key=digits.length===12&&digits.slice(0,2)==='91'?digits.slice(2):digits;need_(c.name&&/^\d{10,15}$/.test(digits)&&!customerPhones.has(key),'Invalid or duplicate customer phone.');customerPhones.add(key);});
   s.inventory.forEach(p=>need_(p.name&&amount(p.stock)&&amount(p.price)&&amount(p.min),'Invalid inventory amount.'));
   s.jobs.forEach(j=>{need_(s.customers.some(c=>c.id===j.customer)&&s.employees.some(e=>e.id===j.assigned)&&date(j.date)&&date(j.due),'Invalid job assignment or date.');need_(Array.isArray(j.services)&&j.services.length>0&&Array.isArray(j.issued),'Invalid job tasks.');j.services.forEach(t=>need_(t.name&&amount(t.price)&&['Pending','In progress','Finished'].includes(t.status),'Invalid service.'));j.issued.forEach(p=>need_(p.name&&amount(p.qty)&&p.qty>0&&amount(p.price),'Invalid issued part.'));});
   const days=new Set();s.attendance.forEach(a=>{const key=a.employee+':'+a.date;need_(s.employees.some(e=>e.id===a.employee)&&date(a.date)&&!days.has(key)&&['Pending','Present','Rejected','Leave','LOP','Holiday'].includes(a.status),'Invalid attendance.');days.add(key);need_(!/[<>"']/.test((a.in||'')+(a.out||'')),'Invalid time.');});

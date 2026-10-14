@@ -36,8 +36,8 @@ function rpc(name,...args){
 'use strict';
 const wd={token:null,revision:0,baseline:'',saving:false,loading:false,refreshQueued:false};
 const SESSION_KEY='workshopdesk.session.v1';
-function savedSession(){try{return JSON.parse(sessionStorage.getItem(SESSION_KEY)||'null')}catch{return null}}
-function rememberSession(){try{if(wd.token&&session)sessionStorage.setItem(SESSION_KEY,JSON.stringify({token:wd.token,page,role,jobFilter}));else sessionStorage.removeItem(SESSION_KEY)}catch{}}
+function savedSession(){for(const name of ['sessionStorage','localStorage'])try{const value=window[name].getItem(SESSION_KEY);if(value)return JSON.parse(value)}catch{}return null}
+function rememberSession(){const value=wd.token&&session?JSON.stringify({token:wd.token,page,role,jobFilter}):null;for(const name of ['localStorage','sessionStorage'])try{if(value)window[name].setItem(SESSION_KEY,value);else window[name].removeItem(SESSION_KEY)}catch{}}
 function hydrate(data){Object.keys(state).forEach(k=>delete state[k]);Object.assign(state,data.state);wd.revision=data.revision;wd.baseline=JSON.stringify(state);}
 function render(){renderLocal();rememberSession();if(session&&wd.token&&!wd.loading&&!wd.saving&&JSON.stringify(state)!==wd.baseline)saveRemote();}
 function busy(value){document.getElementById('sync-mask')?.remove();if(value){const div=document.createElement('div');div.id='sync-mask';div.setAttribute('role','status');div.textContent='Saving to Google Sheets…';div.style.cssText='position:fixed;inset:0;z-index:99999;background:#fffffff0;display:grid;place-items:center;font:600 18px system-ui;color:#164e46';document.body.append(div);}}

@@ -1,5 +1,5 @@
-const CACHE='workshop-desk-shell-v4';
-const FILES=['./','./index.html','./style.css','./catalog.js','./attendance.js?v=4','./account-install.js','./app.js?v=4','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
+const CACHE='workshop-desk-shell-v5';
+const FILES=['./','./index.html','./style.css','./catalog.js','./attendance.js?v=4','./account-install.js','./app.js?v=5','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES)));self.skipWaiting();});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))));self.clients.claim();});
 self.addEventListener('fetch',event=>{

@@ -1,0 +1,7 @@
+# Local outputs and secrets
+outputs/
+node_modules/
+.env
+.env.*
+*.log
+work/design/.openai/

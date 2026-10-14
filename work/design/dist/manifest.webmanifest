@@ -1,0 +1,15 @@
+{
+  "id": "./",
+  "name": "Workshop Desk",
+  "short_name": "Workshop",
+  "description": "Multi-brand workshop management design preview",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f6f2",
+  "theme_color": "#245b4c",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}

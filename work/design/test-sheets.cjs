@@ -28,6 +28,17 @@ a=c.wdRead(admin.token);edit=clone(a.state);edit.employees[0].passwordHash=c.dig
 database.state.employees.push({id:'e2',name:'Other',phone:'9000000002',job:'Technician'});database.state.jobs.push({...clone(seed.jobs[0]),id:'JC-1042',assigned:'e2'});
 e=c.wdLogin('9000000001','new-employee-password');assert.equal(e.state.jobs.length,1);edit=clone(e.state);edit.jobs.push({...clone(seed.jobs[0]),id:'JC-1042',assigned:'e1'});assert.throws(()=>c.wdSave(e.token,e.revision,edit),/Invalid new job/);
 edit=clone(e.state);edit.requests.push({id:'R-test',name:'Oil filter',qty:2,note:'',employee:'e1',date:'2020-01-01',status:'Requested'});saved=c.wdSave(e.token,e.revision,edit);assert.equal(database.state.jobs.length,2);assert.equal(saved.state.requests[0].date,'2026-10-13');
+// A newly added employee can request attendance even if the browser/server
+// serialize object fields in a different order.
+database.state.employees.push({id:'e3',name:'New technician',job:'Mechanic',email:'',phone:'9000000003'});
+setPassword('e3','new-technician-password');
+const newcomer=c.wdLogin('9000000003','new-technician-password');
+edit=clone(newcomer.state);
+edit.employees=edit.employees.map(person=>Object.fromEntries(Object.entries(person).reverse()));
+edit.attendance.push({id:'ATT-new',employee:'e3',date:'2026-10-13',in:'10:30',out:'',note:'',status:'Pending'});
+saved=c.wdSave(newcomer.token,newcomer.revision,edit);
+assert.equal(saved.state.attendance[0].status,'Pending');
+assert.equal(database.state.attendance.find(a=>a.employee==='e3').status,'Pending');
 // Parse each shipped browser script, not just the source modules.
 const html=fs.readFileSync(path.resolve(__dirname,'../../outputs/Google-Sheets-Setup/Index.html'),'utf8');
 const scripts=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)];assert.equal(scripts.length,4);for(const s of scripts)new vm.Script(s[1]);

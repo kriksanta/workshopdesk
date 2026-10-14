@@ -32,6 +32,8 @@ The builder writes to `outputs/Google-Sheets-Setup/`. It uses the Sheet ID in `w
 
 The `WorkshopDesk_Data` tab contains JSON chunks and a revision number. Edit records in Workshop Desk rather than modifying those cells directly. Password verifiers are kept in Apps Script Script Properties, separate from the Sheet. Employee actions are checked on the server: stock can only be issued against an assigned job; attendance requires employer approval. Conflicting saves require the later user to review and repeat the change. Shared changes refresh every 30 seconds when no form is open. This version requires an internet connection and uses Apps Script quotas; it has no offline save queue.
 
+The Apps Script web app can be added as a browser Home Screen shortcut where the mobile browser offers that command. Browsers do not allow a webpage to force installation, and this Apps Script-hosted version is not an installable offline PWA. Its Home screen button provides device instructions when no browser install prompt is available.
+
 One example employee, customer and job card are included for orientation. All spare parts start at quantity 0 and price 0. The Indian vehicle catalog is retained. The original static preview is a design artifact, not the connected app.
 
 ## Validation

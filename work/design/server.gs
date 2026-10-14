@@ -12,7 +12,12 @@ function initializeWorkshop() {
 function doGet() { return HtmlService.createHtmlOutputFromFile('Index').setTitle('Workshop Desk').addMetaTag('viewport','width=device-width, initial-scale=1'); }
 function props_() { return PropertiesService.getScriptProperties(); }
 function copy_(x) { return JSON.parse(JSON.stringify(x)); }
-function equal_(a,b) { return JSON.stringify(a) === JSON.stringify(b); }
+function canonical_(value) {
+  if(Array.isArray(value))return value.map(canonical_);
+  if(value&&typeof value==='object')return Object.keys(value).sort().reduce((out,key)=>{out[key]=canonical_(value[key]);return out;},{});
+  return value;
+}
+function equal_(a,b) { return JSON.stringify(canonical_(a)) === JSON.stringify(canonical_(b)); }
 function need_(ok,message) { if (!ok) throw new Error(message || 'This change is not permitted.'); }
 function locked_(fn) { const l=LockService.getScriptLock(); l.waitLock(30000); try {return fn();} finally {l.releaseLock();} }
 function digest_(text) { return Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256,text,Utilities.Charset.UTF_8).map(b=>('0'+((b+256)%256).toString(16)).slice(-2)).join(''); }
@@ -113,7 +118,7 @@ function validate_(s) {
 function employeeMerge_(old,inc,u) {
   const view=public_({state:old,revision:0},u).state,result=copy_(old),id=u.employee;
   need_(equal_(Object.keys(view).sort(),Object.keys(inc).sort()),'Invalid data.');
-  ['admin','settings','employees','invoices'].forEach(k=>need_(equal_(view[k],inc[k]),'Employer permission required.'));
+  ['admin','settings','employees','invoices'].forEach(k=>need_(equal_(view[k],inc[k]),'Employer permission required to change '+k+'.'));
   // Customer contact details may be managed by staff; removal is not supported.
   list_(inc,'customers');need_(view.customers.every(c=>inc.customers.some(x=>x.id===c.id)),'Customers cannot be deleted.');result.customers=copy_(inc.customers);
   list_(inc,'jobs');need_(view.jobs.every(j=>inc.jobs.some(x=>x.id===j.id)),'Jobs cannot be removed.');

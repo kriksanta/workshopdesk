@@ -20,7 +20,7 @@ function toast(message){if(wd.saving)return;toastLocal(message);}
 async function login(form){
  const d=new FormData(form),err=$('#login-error'),button=form.querySelector('[type=submit]');button.disabled=true;err.textContent='Signing in…';
  try{const data=await rpc('wdLogin',String(d.get('username')).trim(),String(d.get('password')));wd.token=data.token;hydrate(data);session=data.session;role=session.admin?'employer':'employee';page='Dashboard';query='';jobFilter='All jobs';rememberSession();renderLocal();}
- catch(e){err.className='error';err.textContent=e.message||'Sign-in failed.';button.disabled=false;}
+ catch(e){err.className='error';err.textContent=e.message||'Sign-in failed.';if(/Could not connect to Google Sheets/.test(e.message||'')&&typeof BRIDGE_URL!=='undefined'){const link=document.createElement('a');link.href=BRIDGE_URL;link.target='_blank';link.rel='noopener noreferrer';link.textContent='Open backup sign-in';link.style.cssText='display:block;margin-top:8px;text-decoration:underline';err.append(link);}button.disabled=false;}
 }
 async function restoreRemote(){
  const saved=savedSession();if(!saved?.token)return;

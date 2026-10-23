@@ -17,12 +17,12 @@ async function saveRemote(){
 function toast(message){if(wd.saving)return;toastLocal(message)}
 async function login(form){
  const d=new FormData(form),err=$('#login-error'),button=form.querySelector('[type=submit]');button.disabled=true;err.textContent='Signing in…';
- try{await WDF.loginEmail(String(d.get('username')).trim().toLowerCase(),String(d.get('password')));err.textContent='Opening your workshop…'}
+ try{await WDF.loginEmail(String(d.get('username')).trim().toLowerCase(),String(d.get('password')));location.reload()}
  catch(e){err.className='error';err.textContent=WDF.authError(e);button.disabled=false}
 }
 async function googleLogin(){
  const btnEl=document.querySelector('[data-action="google-login"]');if(btnEl)btnEl.disabled=true;
- try{await WDF.loginOwner()}catch(e){const err=$('#login-error');if(err){err.className='error';err.textContent=WDF.authError(e)}if(btnEl)btnEl.disabled=false}
+ try{await WDF.loginOwner();location.reload()}catch(e){const err=$('#login-error');if(err){err.className='error';err.textContent=WDF.authError(e)}if(btnEl)btnEl.disabled=false}
 }
 async function firebaseBoot(){
  WDF.watchAuth(async(user,error)=>{

@@ -34,8 +34,8 @@ function view(raw){
 }
 function watchData(cb){
  stop();const raw={};const required=current?.admin?rows:rows.filter(x=>x!=='invoices');const ready=new Set();
- off.push(onSnapshot(ref('config'),s=>{raw.config=s.exists()?s.data():null;ready.add('config');if(ready.size===required.length+1)cb(view(raw))},e=>cb(null,e)));
- for(const t of required)off.push(onSnapshot(collection(db,'workshops','main',t),s=>{raw[t]=s.docs.map(d=>({...d.data(),id:d.id}));ready.add(t);if(ready.size===required.length+1)cb(view(raw))},e=>cb(null,e)));
+ off.push(onSnapshot(ref('config'),s=>{raw.config=s.exists()?s.data():null;ready.add('config');if(ready.size===required.length+1)cb(view(raw))},e=>cb(null,new Error('config: '+e.message))));
+ for(const t of required)off.push(onSnapshot(collection(db,'workshops','main',t),s=>{raw[t]=s.docs.map(d=>({...d.data(),id:d.id}));ready.add(t);if(ready.size===required.length+1)cb(view(raw))},e=>cb(null,new Error(t+': '+e.message))));
 }
 function clean(t,obj){
  if(obj==null)return obj;

@@ -31,7 +31,7 @@ async function firebaseBoot(){
   session=user;role=user.admin?'employer':'employee';restorePage();
   $('#app').innerHTML=`<main class="workshop-loading" role="status" aria-live="polite"><div class="workshop-loading-card"><div class="workshop-loading-brand"><span class="workshop-loading-logo">${icon('wrench')}</span><span>workshop<span class="workshop-loading-brand-accent">desk.</span></span></div><h1>Opening your workshop</h1><p>Getting your team and jobs ready…</p></div></main>`;
   try{if(user.admin)await WDF.seed(WD_SEED);WDF.watchData((data,err)=>{
-    if(err){toastLocal('Could not sync: '+WDF.authError(err));return}
+    if(err){const message='Could not sync: '+WDF.authError(err);const p=document.querySelector('.workshop-loading p');if(p)p.textContent=message;else toastLocal(message);return}
     if(wd.loading){hydrate(data);wd.loading=false;renderLocal();rememberPage()}
     else applyLatest(data);
   })}

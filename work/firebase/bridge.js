@@ -44,9 +44,12 @@ async function logoutRemote(){
 }
 document.addEventListener('click',e=>{
  if(e.target.closest('[data-action="google-login"]'))googleLogin();
+ if(e.target.closest('[data-action="create-admin-password"]'))openModal('Create admin login',`<p class="notice-inline">Sign in later with username <strong>admin</strong> and the password you set here.</p><form id="owner-password-form"><div class="form-grid"><div class="form-group full"><label for="owner-password">New password</label><input id="owner-password" name="password" type="password" minlength="8" autocomplete="new-password" required></div><div class="form-group full"><label for="owner-password-confirm">Confirm password</label><input id="owner-password-confirm" name="confirm" type="password" minlength="8" autocomplete="new-password" required></div></div><button type="submit" class="btn primary">Create admin login</button></form>`,btn('Cancel','close','','light'));
+ if(e.target.closest('[data-action="reset-admin-password"]'))WDF.resetPassword('admin').then(()=>toastLocal('Password reset email sent to the owner account.')).catch(x=>toastLocal(WDF.authError(x)));
  if(e.target.closest('[data-action="reset-password"]')){const email=prompt('Employee email address for password reset:');if(email)WDF.resetPassword(email.trim()).then(()=>toastLocal('Password reset email sent.')).catch(e=>toastLocal(WDF.authError(e)))}
  if(e.target.closest('[data-action="close"]')&&wd.pending)setTimeout(()=>{const x=wd.pending;wd.pending=null;applyLatest(x)},0);
 });
+document.addEventListener('submit',async e=>{if(e.target.id!=='owner-password-form')return;e.preventDefault();const form=e.target;if(!form.reportValidity())return;const d=new FormData(form),password=String(d.get('password')),confirm=String(d.get('confirm'));if(password!==confirm)return toastLocal('Passwords do not match.');const button=form.querySelector('[type=submit]');button.disabled=true;try{await WDF.createOwnerPassword(password);closeModal();renderLocal();toastLocal('Admin login created. You can now sign in with admin.')}catch(x){toastLocal(WDF.authError(x));button.disabled=false}});
 window.addEventListener('beforeunload',e=>{rememberPage();if(wd.saving){e.preventDefault();e.returnValue=''}});
 document.addEventListener('click',event=>{
  if(!event.target.closest('[data-action="import-sheet"]'))return;

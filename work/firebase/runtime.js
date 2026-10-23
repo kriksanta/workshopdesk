@@ -1,9 +1,9 @@
 import {initializeApp,deleteApp} from 'firebase/app';
-import {getAuth,GoogleAuthProvider,signInWithPopup,signInWithEmailAndPassword,createUserWithEmailAndPassword,sendPasswordResetEmail,onAuthStateChanged,signOut} from 'firebase/auth';
+import {getAuth,GoogleAuthProvider,signInWithPopup,signInWithEmailAndPassword,createUserWithEmailAndPassword,EmailAuthProvider,linkWithCredential,sendPasswordResetEmail,onAuthStateChanged,signOut} from 'firebase/auth';
 import {getFirestore,doc,collection,getDoc,getDocs,onSnapshot,runTransaction,writeBatch,setDoc,serverTimestamp} from 'firebase/firestore';
 const cfg={apiKey:'AIzaSyDcq0u_uFxZe1b13U4KiXMYYblSmMRLRF0',authDomain:'workshop-desk.firebaseapp.com',projectId:'workshop-desk',storageBucket:'workshop-desk.firebasestorage.app',messagingSenderId:'244318154764',appId:'1:244318154764:web:552ad7e88eb8464fb53e29'};
 const app=initializeApp(cfg),auth=getAuth(app),db=getFirestore(app);
-const owner='sreejithsubhashrecy@gmail.com';
+const owner='sreejithsubhashrecy@gmail.com',ownerUid='LqtFFXUQGRWIsOXS1tUUj3qhjYC3';
 const rows=['employees','customers','jobs','inventory','requests','attendance','invoices','jobStatuses','issues'];
 const copy=x=>JSON.parse(JSON.stringify(x));
 const canonical=x=>JSON.stringify(x,(k,v)=>v&&typeof v==='object'&&!Array.isArray(v)?Object.keys(v).sort().reduce((o,key)=>(o[key]=v[key],o),{}):v);
@@ -14,12 +14,12 @@ const authError=e=>({'auth/invalid-credential':'Email or password is incorrect.'
 let off=[],current=null;
 async function identify(user){
  if(!user)return null;
- if(user.email?.toLowerCase()===owner&&user.emailVerified&&user.providerData.some(p=>p.providerId==='google.com'))return {admin:true,email:user.email,name:user.displayName||'Workshop Admin'};
+ if(user.uid===ownerUid&&user.email?.toLowerCase()===owner&&user.emailVerified)return {admin:true,email:user.email,name:user.displayName||'Workshop Admin'};
  const p=await getDoc(profile(user.uid));
  if(!p.exists()||p.data().active!==true||p.data().role!=='employee')throw new Error('This employee account is not active. Ask the admin.');
  return {admin:false,employee:p.data().employeeId,email:user.email};
 }
-async function loginEmail(email,password){const c=await signInWithEmailAndPassword(auth,email,password);return identify(c.user)}
+async function loginEmail(email,password){const c=await signInWithEmailAndPassword(auth,email.toLowerCase()==='admin'?owner:email,password);return identify(c.user)}
 async function loginOwner(){const c=await signInWithPopup(auth,new GoogleAuthProvider());return identify(c.user)}
 function watchAuth(cb){return onAuthStateChanged(auth,async u=>{try{current=await identify(u);cb(current,null)}catch(e){current=null;cb(null,e)}})}
 function stop(){off.forEach(f=>f());off=[]}
@@ -89,7 +89,8 @@ async function setProfile(uid,employeeId,active){
  if(!current?.admin)throw new Error('Admin permission required.');
  await setDoc(profile(uid),{role:'employee',employeeId,active,updatedAt:serverTimestamp()});
 }
-async function resetPassword(email){await sendPasswordResetEmail(auth,email)}
+async function createOwnerPassword(password){const user=auth.currentUser;if(!current?.admin||user?.uid!==ownerUid)throw new Error('Owner sign-in required.');if(user.providerData.some(p=>p.providerId==='password'))throw new Error('Admin password already exists. Use password reset instead.');await linkWithCredential(user,EmailAuthProvider.credential(owner,password));}
+async function resetPassword(email){await sendPasswordResetEmail(auth,email.toLowerCase()==='admin'?owner:email)}
 async function logout(){stop();await signOut(auth)}
 async function seed(seedData){
  if(!current?.admin)throw new Error('Admin permission required.');
@@ -113,6 +114,6 @@ async function importLegacy(data){
  for(let i=0;i<writes.length;i+=400){const batch=writeBatch(db);for(const op of writes.slice(i,i+400))batch.set(ref(op.type,op.id),op.value);await batch.commit();}
  return writes.length;
 }
-window.WDF={auth,db,owner,rows,authError,identify,loginEmail,loginOwner,watchAuth,watchData,stop,save,provision,setProfile,resetPassword,logout,seed,importLegacy};
+window.WDF={auth,db,owner,rows,authError,createOwnerPassword,identify,loginEmail,loginOwner,watchAuth,watchData,stop,save,provision,setProfile,resetPassword,logout,seed,importLegacy};
 
 

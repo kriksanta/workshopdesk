@@ -14,7 +14,7 @@ const authError=e=>({'auth/invalid-credential':'Email or password is incorrect.'
 let off=[],current=null;
 async function identify(user){
  if(!user)return null;
- if(user.uid===ownerUid&&user.email?.toLowerCase()===owner&&user.emailVerified)return {admin:true,email:user.email,name:user.displayName||'Workshop Admin'};
+ if(user.uid===ownerUid&&user.email?.toLowerCase()===owner)return {admin:true,email:user.email,name:user.displayName||'Workshop Admin'};
  const p=await getDoc(profile(user.uid));
  if(!p.exists()||p.data().active!==true||p.data().role!=='employee')throw new Error('This employee account is not active. Ask the admin.');
  return {admin:false,employee:p.data().employeeId,email:user.email};

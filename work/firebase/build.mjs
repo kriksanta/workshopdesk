@@ -18,7 +18,7 @@ app=app.replace('Design preview · One example workflow · Changes reset on refr
  .replace('Design first. Connection later.','Your workshop, connected.')
  .replace('Accounts and changes stay in this tab only and reset on refresh. This is a login flow preview, not secure production authentication. Google Sheets is not connected.','Your workshop data is shared securely through Firebase.')
  .replace('Employees use their phone number.','Employees use their email address.')
- .replace('Your admin sets your password when adding you to the team. Ask your admin if you need it reset.','Your admin creates your account. Ask for a password reset email if needed.')
+ .replace('Your admin sets your password when adding you to the team. Ask your admin if you need it reset.','Your workshop owner creates your account. Ask for a password reset email if needed.')
  .replace('Employees log in with their phone number and the password set by the admin.','Employees log in with their email address and the password set when their account is created.')
  .replace('Save preview','Save settings').replace('Design mode: changes are used in this session’s documents. They are not stored and will reset on refresh.','Saved shop details appear on invoices, estimates and job cards on every device.');
 app=app.replace('label for="login-user">Username','label for="login-user">Email')

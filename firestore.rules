@@ -5,7 +5,6 @@ service cloud.firestore {
   function owner() {
    return signed() && request.auth.uid == 'LqtFFXUQGRWIsOXS1tUUj3qhjYC3'
     && request.auth.token.email == 'sreejithsubhashrecy@gmail.com'
-    && request.auth.token.email_verified == true
     && request.auth.token.firebase.sign_in_provider in ['google.com', 'password'];
   }
   function employee() {

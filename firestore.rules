@@ -2,99 +2,114 @@ rules_version = '2';
 service cloud.firestore {
  match /databases/{database}/documents {
   function signed() { return request.auth != null; }
-  function owner() {
-   return signed() && request.auth.uid == 'LqtFFXUQGRWIsOXS1tUUj3qhjYC3'
-    && request.auth.token.email == 'sreejithsubhashrecy@gmail.com'
-    && request.auth.token.firebase.sign_in_provider in ['google.com', 'password'];
+  function platformAdmin() {
+   return signed()
+    && request.auth.uid == 'i96vKZQdWTNhg0mvQ6Yi3USUiLX2'
+    && request.auth.token.email == 'sreejithsubhashithan@gmail.com';
   }
-  function employee() {
-   return signed() && exists(/databases/$(database)/documents/users/$(request.auth.uid))
-    && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'employee'
+  function member(wid) {
+   return signed()
+    && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+    && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.workshopId == wid
     && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.active == true;
   }
+  function owner(wid) {
+   return platformAdmin() || (member(wid)
+    && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'owner');
+  }
+  function employee(wid) {
+   return member(wid)
+    && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'employee';
+  }
   function employeeId() { return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.employeeId; }
-  function active() { return owner() || employee(); }
-  function assigned(jobId) {
-   return getAfter(/databases/$(database)/documents/workshops/main/jobs/$(jobId)).data.assigned == employeeId();
+  function active(wid) { return owner(wid) || employee(wid); }
+  function assigned(jobId,wid) {
+   return getAfter(/databases/$(database)/documents/workshops/$(wid)/jobs/$(jobId)).data.assigned == employeeId();
   }
   match /users/{uid} {
-   allow read: if owner() || (signed() && request.auth.uid == uid);
-   allow write: if owner()
-    && request.resource.data.keys().hasOnly(['role','employeeId','active','updatedAt'])
-    && request.resource.data.role == 'employee'
-    && request.resource.data.employeeId is string
-    && request.resource.data.active is bool;
+   allow read: if platformAdmin() || (signed() && request.auth.uid == uid)
+     || (resource.data.workshopId is string && owner(resource.data.workshopId));
+   allow create, update: if platformAdmin()
+     || (request.resource.data.workshopId is string
+       && owner(request.resource.data.workshopId)
+       && request.resource.data.role == 'employee'
+       && request.resource.data.employeeId is string
+       && request.resource.data.active is bool
+       && request.resource.data.keys().hasOnly(['role','workshopId','employeeId','active','updatedAt'])
+       && (!exists(/databases/$(database)/documents/users/$(uid))
+         || resource.data.workshopId == request.resource.data.workshopId));
+   allow delete: if platformAdmin();
   }
-  match /workshops/main {
-   allow read: if active();
-   allow create, update: if owner() && request.resource.data.keys().hasOnly(['admin','settings']);
+  match /workshops/{wid} {
+   allow read: if active(wid);
+   allow create, update: if owner(wid) && request.resource.data.keys().hasOnly(['admin','settings']);
    allow delete: if false;
    match /employees/{id} {
-    allow read: if active();
-    allow write: if owner() && request.resource.data.id == id
+    allow read: if active(wid);
+    allow write: if owner(wid) && request.resource.data.id == id
       && request.resource.data.keys().hasOnly(['id','name','job','phone','email','authUid','active']);
    }
    match /customers/{id} {
-    allow read: if active();
-    allow create, update: if active() && request.resource.data.id == id
+    allow read: if active(wid);
+    allow create, update: if active(wid) && request.resource.data.id == id
       && request.resource.data.keys().hasOnly(['id','name','phone','address','brand','model','plate']);
-    allow delete: if owner();
+    allow delete: if owner(wid);
    }
    match /inventory/{id} {
-    allow read: if active();
-    allow create, delete: if owner();
-    allow update: if owner() || (employee()
+    allow read: if active(wid);
+    allow create, delete: if owner(wid);
+    allow update: if owner(wid) || (employee(wid)
       && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['stock'])
       && request.resource.data.stock is number
       && request.resource.data.stock >= 0
       && request.resource.data.stock < resource.data.stock);
    }
    match /jobs/{id} {
-    allow read: if active();
-    allow create: if owner() || (employee()
+    allow read: if active(wid);
+    allow create: if owner(wid) || (employee(wid)
       && request.resource.data.id == id
       && request.resource.data.assigned == employeeId()
       && request.resource.data.keys().hasOnly(['id','customer','assigned','date','due','brand','model','plate','odometer','fuel','notes','services']));
-    allow update, delete: if owner();
+    allow update, delete: if owner(wid);
    }
    match /jobStatuses/{id} {
-    allow read: if active();
-    allow create, update: if owner() || (employee() && assigned(id)
+    allow read: if active(wid);
+    allow create, update: if owner(wid) || (employee(wid) && assigned(id,wid)
       && request.resource.data.keys().hasOnly(['values'])
       && request.resource.data.values is list
       && request.resource.data.values.size() <= 50
-      && request.resource.data.values.size() == getAfter(/databases/$(database)/documents/workshops/main/jobs/$(id)).data.services.size()
+      && request.resource.data.values.size() == getAfter(/databases/$(database)/documents/workshops/$(wid)/jobs/$(id)).data.services.size()
       && request.resource.data.values.toSet().hasOnly(['Pending','In progress','Finished']));
-    allow delete: if owner();
+    allow delete: if owner(wid);
    }
    match /issues/{id} {
-    allow read: if active();
-    allow create: if owner() || (employee()
-      && request.resource.data.job is string && assigned(request.resource.data.job)
+    allow read: if active(wid);
+    allow create: if owner(wid) || (employee(wid)
+      && request.resource.data.job is string && assigned(request.resource.data.job,wid)
       && request.resource.data.part is string
       && request.resource.data.qty is number && request.resource.data.qty > 0
-      && exists(/databases/$(database)/documents/workshops/main/inventory/$(request.resource.data.part))
-      && get(/databases/$(database)/documents/workshops/main/inventory/$(request.resource.data.part)).data.stock >= request.resource.data.qty
-      && getAfter(/databases/$(database)/documents/workshops/main/inventory/$(request.resource.data.part)).data.stock ==
-         get(/databases/$(database)/documents/workshops/main/inventory/$(request.resource.data.part)).data.stock - request.resource.data.qty
-      && request.resource.data.price == get(/databases/$(database)/documents/workshops/main/inventory/$(request.resource.data.part)).data.price);
-    allow update, delete: if owner();
+      && exists(/databases/$(database)/documents/workshops/$(wid)/inventory/$(request.resource.data.part))
+      && get(/databases/$(database)/documents/workshops/$(wid)/inventory/$(request.resource.data.part)).data.stock >= request.resource.data.qty
+      && getAfter(/databases/$(database)/documents/workshops/$(wid)/inventory/$(request.resource.data.part)).data.stock ==
+         get(/databases/$(database)/documents/workshops/$(wid)/inventory/$(request.resource.data.part)).data.stock - request.resource.data.qty
+      && request.resource.data.price == get(/databases/$(database)/documents/workshops/$(wid)/inventory/$(request.resource.data.part)).data.price);
+    allow update, delete: if owner(wid);
    }
    match /requests/{id} {
-    allow read: if active();
-    allow create: if owner() || (employee()
+    allow read: if active(wid);
+    allow create: if owner(wid) || (employee(wid)
       && request.resource.data.id == id
       && request.resource.data.employee == employeeId()
       && request.resource.data.status == 'Requested');
-    allow update, delete: if owner();
+    allow update, delete: if owner(wid);
    }
    match /attendance/{id} {
-    allow read: if active();
-    allow create: if owner() || (employee()
+    allow read: if active(wid);
+    allow create: if owner(wid) || (employee(wid)
       && request.resource.data.id == id
       && request.resource.data.employee == employeeId()
       && request.resource.data.status == 'Pending');
-    allow update: if owner() || (employee()
+    allow update: if owner(wid) || (employee(wid)
       && resource.data.employee == employeeId()
       && ((
         resource.data.status == 'Present'
@@ -107,10 +122,10 @@ service cloud.firestore {
         && request.resource.data.employee == employeeId()
         && request.resource.data.date == resource.data.date
       )));
-    allow delete: if owner();
+    allow delete: if owner(wid);
    }
    match /invoices/{id} {
-    allow read, write: if owner();
+    allow read, write: if owner(wid);
    }
   }
  }

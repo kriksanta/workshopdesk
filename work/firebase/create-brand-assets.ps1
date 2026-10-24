@@ -24,7 +24,7 @@ try {
       $icon = New-Object System.Drawing.Bitmap($size, $size, [System.Drawing.Imaging.PixelFormat]::Format32bppArgb)
       $g = [System.Drawing.Graphics]::FromImage($icon)
       try {
-        $g.Clear([System.Drawing.Color]::FromArgb(211,211,211))
+        $g.Clear([System.Drawing.Color]::FromArgb(226,239,217))
         $g.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
         $pad = [int][Math]::Round($size*0.10)
         $g.DrawImage($mark, $pad, $pad, $size-2*$pad, $size-2*$pad)
@@ -34,9 +34,9 @@ try {
     $favicon = New-Object System.Drawing.Bitmap(48,48,[System.Drawing.Imaging.PixelFormat]::Format32bppArgb)
     $g = [System.Drawing.Graphics]::FromImage($favicon)
     try {
-      $g.Clear([System.Drawing.Color]::Transparent)
+      $g.Clear([System.Drawing.Color]::FromArgb(226,239,217))
       $g.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
-      $g.DrawImage($mark,0,0,48,48)
+      $g.DrawImage($mark,4,4,40,40)
     } finally { $g.Dispose() }
     try { $favicon.Save((Join-Path $dist 'favicon-48.png'), [System.Drawing.Imaging.ImageFormat]::Png) } finally { $favicon.Dispose() }
   } finally { $mark.Dispose(); $scaled.Dispose() }

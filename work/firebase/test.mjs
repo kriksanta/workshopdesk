@@ -37,5 +37,10 @@ assert.doesNotMatch(runtime,/doc\(db,'workshops','main'/);
 assert.match(runtime,/workshopId/);
 assert.match(app,/owner-invite-form/);
 assert.match(app,/login-reset/);
+assert.match(app,/brand-logo\.png/);
+assert.match(app,/class="mobile-call"/);
+assert.match(app,/href="tel:\+/);
+assert.match(app,/Remove owner/);
+assert.match(app,/Restore/);
 for(const f of ['app.js','firebase-runtime.js']){const r=spawnSync(process.execPath,['--check',new URL('../../firebase-public/'+f,import.meta.url).pathname.replace(/^\/(?:[A-Za-z]:)/,x=>x.slice(1))],{encoding:'utf8'});assert.equal(r.status,0,r.stderr)}
 console.log('Firebase adapter and generated app checks passed.');

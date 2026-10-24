@@ -29,7 +29,7 @@ async function firebaseBoot(){
   if(error){session=null;wd.loading=false;renderLocal();const el=$('#login-error');if(el){el.className='error';el.textContent=WDF.authError(error)}return}
   if(!user){session=null;role='employer';wd.baseline='';wd.loading=false;renderLocal();return}
   session=user;role=user.admin?'employer':'employee';if(user.platformAdmin){wd.loading=false;renderPlatformAdmin();WDF.watchOwners((owners,err)=>{if(err){toastLocal(WDF.authError(err));return}platform.owners=owners;renderPlatformAdmin()});return}restorePage();
-  $('#app').innerHTML=`<main class="workshop-loading" role="status" aria-live="polite"><div class="workshop-loading-card"><div class="workshop-loading-brand"><span class="workshop-loading-logo">${icon('wrench')}</span><span>workshop<span class="workshop-loading-brand-accent">desk.</span></span></div><h1>Opening your workshop</h1><p>Getting your team and jobs ready…</p></div></main>`;
+  $('#app').innerHTML=`<main class="workshop-loading" role="status" aria-live="polite"><div class="workshop-loading-card"><div class="workshop-loading-brand"><span class="workshop-loading-logo"><img src="brand-logo.png" alt="" aria-hidden="true"></span><span>workshop<span class="workshop-loading-brand-accent">desk.</span></span></div><h1>Opening your workshop</h1><p>Getting your team and jobs ready…</p></div></main>`;
   try{if(user.admin)await WDF.seed(WD_SEED);WDF.watchData((data,err)=>{
     if(err){const message='Could not sync: '+WDF.authError(err);const p=document.querySelector('.workshop-loading p');if(p)p.textContent=message;else toastLocal(message);return}
     if(wd.loading){hydrate(data);wd.loading=false;renderLocal();rememberPage()}

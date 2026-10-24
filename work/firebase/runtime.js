@@ -11,7 +11,7 @@ const equal=(a,b)=>canonical(a)===canonical(b);
 const ref=(type,id)=>{const wid=current?.workshopId;if(!wid)throw new Error('Workshop account required.');return type==='config'?doc(db,'workshops',wid):doc(db,'workshops',wid,type,id)};
 const profile=uid=>doc(db,'users',uid);
 const authError=e=>({'auth/invalid-credential':'Email or password is incorrect.','auth/email-already-in-use':'This email already has an account.','auth/too-many-requests':'Too many attempts. Try again later.','auth/popup-closed-by-user':'Google sign-in was closed.','permission-denied':'You do not have permission for this change.'})[e.code]||e.message||String(e);
-let off=[],current=null;
+let off=[],current=null,profileOff=null;
 async function identify(user){
  if(!user)return null;
  if(user.uid===adminUid&&user.email?.toLowerCase()===adminEmail)return {platformAdmin:true,admin:false,email:user.email,name:'Platform admin'};
@@ -24,7 +24,15 @@ async function identify(user){
 }
 async function loginEmail(email,password){const c=await signInWithEmailAndPassword(auth,email.toLowerCase()==='admin'?adminEmail:email,password);return identify(c.user)}
 async function loginOwner(){const c=await signInWithPopup(auth,new GoogleAuthProvider());return identify(c.user)}
-function watchAuth(cb){return onAuthStateChanged(auth,async u=>{try{current=await identify(u);cb(current,null)}catch(e){current=null;cb(null,e)}})}
+function watchAuth(cb){return onAuthStateChanged(auth,async u=>{
+ profileOff?.();profileOff=null;
+ try{
+  current=await identify(u);cb(current,null);
+  if(u&&!current?.platformAdmin)profileOff=onSnapshot(profile(u.uid),s=>{
+   if(!s.exists()||s.data().active!==true){stop();current=null;signOut(auth).catch(()=>{});cb(null,new Error('This account was removed. Ask the admin to restore it.'))}
+  },e=>cb(null,e));
+ }catch(e){current=null;cb(null,e)}
+})}
 function stop(){off.forEach(f=>f());off=[]}
 function view(raw){
  const result={admin:raw.config?.admin||{name:current?.name||'Workshop Admin',username:current?.email||''},settings:raw.config?.settings||{name:'Your Workshop',address:'',phone:'',gst:'',logo:'',footer:'Thank you for trusting us with your car. Drive safe!',currency:'INR'}};
@@ -97,7 +105,20 @@ async function inviteOwner(email,name){
  return {uid,workshopId,email,name};
 }
 function watchOwners(cb){if(!current?.platformAdmin)throw new Error('Platform admin permission required.');const unsub=onSnapshot(collection(db,'users'),s=>cb(s.docs.map(d=>({uid:d.id,...d.data()})).filter(x=>x.role==='owner'),null),e=>cb(null,e));off.push(unsub);return unsub}
-async function provision(employeeData){
+async function setOwnerActive(uid,active){
+ if(!current?.platformAdmin)throw new Error('Platform admin permission required.');
+ const all=(await getDocs(collection(db,'users'))).docs.map(d=>({uid:d.id,...d.data()}));
+ const owner=all.find(x=>x.uid===uid&&x.role==='owner');if(!owner)throw new Error('Owner account not found.');
+ const employees=all.filter(x=>x.role==='employee'&&x.workshopId===owner.workshopId);
+ if(employees.length>450)throw new Error('Too many employees to update at once. Contact support.');
+ const batch=writeBatch(db);
+ batch.set(profile(uid),{active,updatedAt:serverTimestamp()},{merge:true});
+ for(const person of employees){
+  if(!active&&person.active===true)batch.set(profile(person.uid),{active:false,suspendedByOwner:true,updatedAt:serverTimestamp()},{merge:true});
+  if(active&&person.suspendedByOwner===true)batch.set(profile(person.uid),{active:true,suspendedByOwner:false,updatedAt:serverTimestamp()},{merge:true});
+ }
+ await batch.commit();
+}async function provision(employeeData){
  if(!current?.admin||!current.workshopId)throw new Error('Owner permission required.');
  const uid=await makeAuthAccount(employeeData.email);
  await setProfile(uid,employeeData.id,true);
@@ -118,4 +139,4 @@ async function seed(seedData){
  for(const part of seedData.inventory)batch.set(ref('inventory',part.id),clean('inventory',part));
  await batch.commit();
 }
-window.WDF={auth,db,get owner(){return current?.email||''},adminEmail,rows,authError,identify,loginEmail,loginOwner,watchAuth,watchData,watchOwners,stop,save,provision,setProfile,resetPassword,inviteOwner,logout,seed};
+window.WDF={auth,db,get owner(){return current?.email||''},adminEmail,rows,authError,identify,loginEmail,loginOwner,watchAuth,watchData,watchOwners,setOwnerActive,stop,save,provision,setProfile,resetPassword,inviteOwner,logout,seed};

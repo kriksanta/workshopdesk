@@ -28,6 +28,14 @@ assert.deepEqual(Array.from(context.compute(before,after),x=>x.type),['invoices'
 before=copy(after);after=copy(before);after.invoices=[];
 assert.deepEqual(Array.from(context.compute(before,after),x=>x.type),['invoices']);
 const app=fs.readFileSync(new URL('../../firebase-public/app.js',import.meta.url),'utf8');
-assert.match(app,/Owner: sign in with Google/);assert.match(app,/Employee login email/);assert.doesNotMatch(app,/google\.script\.run|ADMIN_PASSWORD_HASH/);
+assert.match(app,/Sign in with Google/);assert.match(app,/Forgot password/);assert.match(app,/Invite owner/);assert.match(app,/Employee login email/);assert.doesNotMatch(app,/google\.script\.run|ADMIN_PASSWORD_HASH/);
+const rules=fs.readFileSync(new URL('../../firestore.rules',import.meta.url),'utf8');
+assert.match(rules,/match \/workshops\/\{wid\}/);
+assert.match(rules,/function platformAdmin\(\)/);
+assert.match(rules,/request\.resource\.data\.role == 'employee'/);
+assert.doesNotMatch(runtime,/doc\(db,'workshops','main'/);
+assert.match(runtime,/workshopId/);
+assert.match(app,/owner-invite-form/);
+assert.match(app,/login-reset/);
 for(const f of ['app.js','firebase-runtime.js']){const r=spawnSync(process.execPath,['--check',new URL('../../firebase-public/'+f,import.meta.url).pathname.replace(/^\/(?:[A-Za-z]:)/,x=>x.slice(1))],{encoding:'utf8'});assert.equal(r.status,0,r.stderr)}
 console.log('Firebase adapter and generated app checks passed.');

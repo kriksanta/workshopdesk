@@ -28,7 +28,7 @@ async function firebaseBoot(){
  WDF.watchAuth(async(user,error)=>{
   if(error){session=null;wd.loading=false;renderLocal();const el=$('#login-error');if(el){el.className='error';el.textContent=WDF.authError(error)}return}
   if(!user){session=null;role='employer';wd.baseline='';wd.loading=false;renderLocal();return}
-  session=user;role=user.admin?'employer':'employee';restorePage();
+  session=user;role=user.admin?'employer':'employee';if(user.platformAdmin){wd.loading=false;renderPlatformAdmin();WDF.watchOwners((owners,err)=>{if(err){toastLocal(WDF.authError(err));return}platform.owners=owners;renderPlatformAdmin()});return}restorePage();
   $('#app').innerHTML=`<main class="workshop-loading" role="status" aria-live="polite"><div class="workshop-loading-card"><div class="workshop-loading-brand"><span class="workshop-loading-logo">${icon('wrench')}</span><span>workshop<span class="workshop-loading-brand-accent">desk.</span></span></div><h1>Opening your workshop</h1><p>Getting your team and jobs ready…</p></div></main>`;
   try{if(user.admin)await WDF.seed(WD_SEED);WDF.watchData((data,err)=>{
     if(err){const message='Could not sync: '+WDF.authError(err);const p=document.querySelector('.workshop-loading p');if(p)p.textContent=message;else toastLocal(message);return}
@@ -44,20 +44,20 @@ async function logoutRemote(){
 }
 document.addEventListener('click',e=>{
  if(e.target.closest('[data-action="google-login"]'))googleLogin();
- if(e.target.closest('[data-action="create-admin-password"]'))openModal('Create admin login',`<p class="notice-inline">Sign in later with username <strong>admin</strong> and the password you set here.</p><form id="owner-password-form"><div class="form-grid"><div class="form-group full"><label for="owner-password">New password</label><input id="owner-password" name="password" type="password" minlength="8" autocomplete="new-password" required></div><div class="form-group full"><label for="owner-password-confirm">Confirm password</label><input id="owner-password-confirm" name="confirm" type="password" minlength="8" autocomplete="new-password" required></div></div><button type="submit" class="btn primary">Create admin login</button></form>`,btn('Cancel','close','','light'));
- if(e.target.closest('[data-action="reset-admin-password"]'))WDF.resetPassword('admin').then(()=>toastLocal('Password reset email sent to the owner account.')).catch(x=>toastLocal(WDF.authError(x)));
+ if(e.target.closest('[data-action="login-reset"]')){const email=String(document.querySelector('#login-user')?.value||'').trim();if(!email)return toastLocal('Enter admin or your email first.');WDF.resetPassword(email).then(()=>toastLocal('Password reset email sent if the account exists.')).catch(x=>toastLocal(WDF.authError(x)))}
+ if(e.target.closest('[data-action="reset-owner-password"]'))WDF.resetPassword(WDF.owner).then(()=>toastLocal('Password reset email sent.')).catch(x=>toastLocal(WDF.authError(x)));
  if(e.target.closest('[data-action="reset-password"]')){const email=prompt('Employee email address for password reset:');if(email)WDF.resetPassword(email.trim()).then(()=>toastLocal('Password reset email sent.')).catch(e=>toastLocal(WDF.authError(e)))}
  if(e.target.closest('[data-action="close"]')&&wd.pending)setTimeout(()=>{const x=wd.pending;wd.pending=null;applyLatest(x)},0);
 });
-document.addEventListener('submit',async e=>{if(e.target.id!=='owner-password-form')return;e.preventDefault();const form=e.target;if(!form.reportValidity())return;const d=new FormData(form),password=String(d.get('password')),confirm=String(d.get('confirm'));if(password!==confirm)return toastLocal('Passwords do not match.');const button=form.querySelector('[type=submit]');button.disabled=true;try{await WDF.createOwnerPassword(password);closeModal();renderLocal();toastLocal('Admin login created. You can now sign in with admin.')}catch(x){toastLocal(WDF.authError(x));button.disabled=false}});
 window.addEventListener('beforeunload',e=>{rememberPage();if(wd.saving){e.preventDefault();e.returnValue=''}});
 document.addEventListener('click',event=>{
  if(!event.target.closest('[data-action="import-sheet"]'))return;
  const input=document.createElement('input');input.type='file';input.accept='application/json,.json';input.style.display='none';document.body.append(input);
  input.addEventListener('change',async()=>{
-  try{if(!input.files?.[0])return;busy(true);const data=JSON.parse(await input.files[0].text());const count=await WDF.importLegacy(data);toastLocal('Imported '+count+' workshop records. Employees need email login setup.');}
+  try{if(!input.files?.[0])return;busy(true);const data=JSON.parse(await input.files[0].text());throw new Error('Legacy import is disabled for new workshops.');}
   catch(e){openModal('Import failed',`<p>${esc(WDF.authError(e))}</p>`,btn('Review','close','','primary'))}
   finally{busy(false);input.remove()}
  },{once:true});
  input.click();
 });
+

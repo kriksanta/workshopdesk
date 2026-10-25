@@ -15,19 +15,6 @@
             "value": "no-cache"
           }
         ]
-      },
-      {
-        "source": "/download/Workshop-Desk.exe",
-        "headers": [
-          {
-            "key": "Content-Type",
-            "value": "application/vnd.microsoft.portable-executable"
-          },
-          {
-            "key": "Content-Disposition",
-            "value": "attachment; filename=Workshop-Desk.exe"
-          }
-        ]
       }
     ]
   },

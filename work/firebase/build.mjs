@@ -54,7 +54,6 @@ fs.writeFileSync(path.join(out,'sw.js'),`const CACHE='workshop-desk-firebase-v2'
 const website=path.join(root,'work/website'),download=path.join(out,'download');
 fs.mkdirSync(download,{recursive:true});
 for(const file of ['index.html','style.css','logo.png','favicon.png'])fs.copyFileSync(path.join(website,file),path.join(download,file));
-fs.copyFileSync(path.join(root,'desktop/Workshop-Desk.exe'),path.join(download,'Workshop-Desk.exe'));
 console.log('Built Firebase PWA in firebase-public');
 
 

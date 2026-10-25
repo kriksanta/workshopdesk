@@ -1,6 +1,6 @@
 'use strict';
 let deferredAppInstall=null;
-function appIsInstalled(){return window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true}
+function appIsInstalled(){return window.matchMedia('(display-mode: fullscreen)').matches||window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true}
 function installAppButton(extra=''){return `<button type="button" class="btn small install-entry ${extra}" data-action="install-app" aria-label="${appIsInstalled()?'App installed':'Install app on your device'}">${icon(appIsInstalled()?'check':'download')}<span>${appIsInstalled()?'Installed':'Install app'}</span></button>`}
 function refreshInstallButtons(){$$('[data-action=install-app]').forEach(b=>{b.innerHTML=icon(appIsInstalled()?'check':'download')+`<span>${appIsInstalled()?'Installed':'Install app'}</span>`;b.setAttribute('aria-label',appIsInstalled()?'App installed':'Install app on your device')})}
 window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();deferredAppInstall=event;refreshInstallButtons()});

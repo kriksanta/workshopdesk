@@ -1,1 +1,38 @@
-{"hosting":{"public":"firebase-public","ignore":["firebase.json","**/.*","**/node_modules/**"],"headers":[{"source":"**","headers":[{"key":"Cache-Control","value":"no-cache"}]}]},"firestore":{"rules":"firestore.rules","indexes":"firestore.indexes.json"}}
+{
+  "hosting": {
+    "public": "firebase-public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "headers": [
+      {
+        "source": "**",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      },
+      {
+        "source": "/download/Workshop-Desk.exe",
+        "headers": [
+          {
+            "key": "Content-Type",
+            "value": "application/vnd.microsoft.portable-executable"
+          },
+          {
+            "key": "Content-Disposition",
+            "value": "attachment; filename=Workshop-Desk.exe"
+          }
+        ]
+      }
+    ]
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  }
+}

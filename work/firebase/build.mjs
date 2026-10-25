@@ -53,7 +53,7 @@ const assets=['./','./index.html','./style.css','./catalog.js','./attendance.js'
 fs.writeFileSync(path.join(out,'sw.js'),`const CACHE='workshop-desk-firebase-v2',FILES=${JSON.stringify(assets)};self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES)));self.skipWaiting()});self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));self.clients.claim()});self.addEventListener('fetch',e=>{if(e.request.method!=='GET'||new URL(e.request.url).origin!==self.location.origin)return;e.respondWith(fetch(e.request).then(r=>{if(r.ok)caches.open(CACHE).then(c=>c.put(e.request,r.clone()));return r}).catch(()=>caches.match(e.request)))});`);
 const website=path.join(root,'work/website'),download=path.join(out,'download');
 fs.mkdirSync(download,{recursive:true});
-for(const file of ['index.html','style.css','logo.png','favicon.png'])fs.copyFileSync(path.join(website,file),path.join(download,file));
+for(const file of ['index.html','style.css','site.js','logo.png','favicon.png'])fs.copyFileSync(path.join(website,file),path.join(download,file));
 console.log('Built Firebase PWA in firebase-public');
 
 

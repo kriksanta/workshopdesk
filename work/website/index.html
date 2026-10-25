@@ -3,89 +3,125 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#123d32">
+  <meta name="theme-color" content="#080d18">
   <meta name="description" content="Workshop Desk brings jobs, customers, inventory, attendance and billing together for multi-brand car workshops. Get it for Windows, mobile or your browser.">
-  <title>Workshop Desk — Run your workshop with clarity</title>
+  <title>Workshop Desk — Keep the whole workshop moving</title>
   <link rel="icon" href="./favicon.png" type="image/png">
   <link rel="stylesheet" href="./style.css">
+  <script src="./site.js" defer></script>
 </head>
 <body>
-  <div class="topline"><span class="topline-dot"></span> One workspace for every car you service</div>
-  <header class="site-header shell">
-    <a class="brand" href="#top" aria-label="Workshop Desk home">
-      <span class="brand-symbol"><img src="./logo.png" alt=""></span>
-      <span>Workshop <strong>Desk</strong></span>
-    </a>
-    <nav class="nav-links" aria-label="Main navigation">
-      <a href="#features">Features</a>
-      <a href="#download">Get the app</a>
-      <a class="nav-open" href="https://workshop-desk.web.app/">Open app <span aria-hidden="true">↗</span></a>
-    </nav>
+  <div class="ambient ambient-one" aria-hidden="true"></div>
+  <div class="ambient ambient-two" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="shell header-inner">
+      <a class="brand" href="#top" aria-label="Workshop Desk home">
+        <span class="brand-icon"><img src="./logo.png" alt=""></span>
+        <span>workshop<span class="brand-dot">.</span>desk</span>
+      </a>
+      <nav class="nav" aria-label="Main navigation">
+        <a href="#features">What it does</a>
+        <a href="#how-it-works">How it works</a>
+        <a href="#download">Get the app</a>
+      </nav>
+      <a class="header-app" href="https://workshop-desk.web.app/">Open app <span aria-hidden="true">↗</span></a>
+    </div>
   </header>
 
-  <main id="top">
-    <section class="hero shell">
+  <main id="main">
+    <section class="hero shell" id="top">
       <div class="hero-copy">
-        <div class="eyebrow"><span class="eyebrow-line"></span> MADE FOR THE WORKSHOP FLOOR</div>
-        <h1>Every job, part and person. <em>In one place.</em></h1>
-        <p class="hero-lead">Keep your workshop moving from first customer call to final invoice. Workshop Desk brings your daily work into one clear, shared view.</p>
+        <div class="eyebrow"><span class="sparkle" aria-hidden="true">✦</span> A BETTER DAY AT THE WORKSHOP</div>
+        <h1>Less chaos.<br><span>More <em>momentum.</em></span></h1>
+        <p>From the first customer call to the final invoice, keep your people, parts and progress in one lively workspace.</p>
         <div class="hero-actions">
-          <a class="button button-primary" href="#download">Get Workshop Desk <span aria-hidden="true">↗</span></a>
-          <a class="button button-quiet" href="#features">Explore features <span aria-hidden="true">↓</span></a>
+          <a class="btn btn-lime" href="#download">Get Workshop Desk <span aria-hidden="true">↗</span></a>
+          <a class="btn btn-outline" href="#how-it-works"><span class="play-dot" aria-hidden="true">▶</span> See how it works</a>
         </div>
-        <div class="hero-proof"><span class="proof-icons" aria-hidden="true">✓ ✓ ✓</span><span>Built for owners, teams and multi-brand workshops</span></div>
+        <div class="hero-foot"><span class="avatar-stack" aria-hidden="true"><i>J</i><i>S</i><i>A</i></span><span>For owners, employees and every brand in the bay.</span></div>
       </div>
-      <div class="hero-art" aria-label="Preview of a workshop dashboard">
-        <div class="art-glow"></div>
-        <div class="preview-window">
-          <div class="preview-bar"><div class="preview-brand"><span class="preview-logo"><img src="./logo.png" alt=""></span> Workshop Desk</div><span class="preview-today">Today’s workshop</span></div>
-          <div class="preview-body">
-            <div class="preview-heading"><div><span class="tiny-label">WORKSHOP OVERVIEW</span><h2>Good morning, team.</h2></div><span class="preview-date">Live day view</span></div>
-            <div class="metric-row">
-              <div class="metric"><span>Active jobs</span><strong>08</strong><small>Across your floor</small></div>
-              <div class="metric"><span>Ready to deliver</span><strong>03</strong><small>Keep customers updated</small></div>
-              <div class="metric"><span>Parts to review</span><strong>02</strong><small>Stay ahead of shortages</small></div>
+
+      <div class="hero-demo" aria-label="Interactive app preview">
+        <div class="orbit orbit-a" aria-hidden="true"></div><div class="orbit orbit-b" aria-hidden="true"></div>
+        <div class="board">
+          <div class="board-top">
+            <div class="board-brand"><span class="mini-logo"><img src="./logo.png" alt=""></span> workshop.desk <span class="board-demo">DEMO PREVIEW</span></div>
+            <span class="board-signal"><i></i> In motion</span>
+          </div>
+          <div class="board-body">
+            <div class="board-nav" role="tablist" aria-label="Preview a workshop view">
+              <button type="button" role="tab" aria-selected="true" aria-controls="board-panel" data-demo="jobs">Jobs</button>
+              <button type="button" role="tab" aria-selected="false" aria-controls="board-panel" data-demo="inventory">Parts</button>
+              <button type="button" role="tab" aria-selected="false" aria-controls="board-panel" data-demo="team">Team</button>
             </div>
-            <div class="preview-list"><div class="list-title">Job cards <span>View all →</span></div>
-              <div class="job-row"><span class="job-icon">01</span><div><strong>Service & inspection</strong><small>Maruti Suzuki Swift</small></div><span class="status status-progress">In progress</span></div>
-              <div class="job-row"><span class="job-icon">02</span><div><strong>Brake repair</strong><small>Hyundai Creta</small></div><span class="status status-done">Finished</span></div>
-              <div class="job-row"><span class="job-icon">03</span><div><strong>Oil change</strong><small>Tata Nexon</small></div><span class="status status-progress">In progress</span></div>
+            <div id="board-panel" role="tabpanel" aria-live="polite">
+              <div class="board-intro"><span id="demo-kicker">TODAY ON THE FLOOR</span><h2 id="demo-title">Every job has a next step.</h2><p id="demo-description">See what is moving, what is ready and who is on it.</p></div>
+              <div class="board-stats">
+                <div class="stat stat-cyan"><span id="demo-stat-one-label">In progress</span><strong id="demo-stat-one">08</strong><small id="demo-stat-one-note">On the floor</small></div>
+                <div class="stat stat-pink"><span id="demo-stat-two-label">Ready to deliver</span><strong id="demo-stat-two">03</strong><small id="demo-stat-two-note">Keep customers in the loop</small></div>
+              </div>
+              <div class="board-item"><span class="board-item-icon" id="demo-icon" aria-hidden="true">✦</span><div><strong id="demo-item-title">Service & inspection</strong><small id="demo-item-subtitle">Maruti Suzuki Swift · Assigned to Arjun</small></div><span class="board-item-pill" id="demo-pill">In progress</span></div>
             </div>
           </div>
         </div>
-        <div class="floating-note"><span class="note-icon">✓</span><span><strong>Everything in sync</strong><small>From desk to workshop floor</small></span></div>
+        <div class="float-card"><span class="float-check" aria-hidden="true">✓</span><span><strong>Team in sync</strong><small>One clear view for everyone</small></span></div>
+        <span class="hero-sticker sticker-one" aria-hidden="true">✳</span>
+        <span class="hero-sticker sticker-two" aria-hidden="true">✳</span>
       </div>
     </section>
 
-    <section class="value-strip" aria-label="Workshop Desk highlights">
-      <div class="shell value-inner"><span>JOB CARDS</span><i></i><span>ATTENDANCE</span><i></i><span>INVENTORY</span><i></i><span>INVOICES</span><i></i><span>CUSTOMERS</span></div>
-    </section>
+    <div class="ticker" aria-label="Workshop Desk capabilities"><div class="ticker-track" aria-hidden="true"><span>JOB CARDS</span><b>✳</b><span>LIVE PROGRESS</span><b>✳</b><span>SPARE PARTS</span><b>✳</b><span>HAPPY CUSTOMERS</span><b>✳</b><span>BETTER DAYS</span><b>✳</b><span>JOB CARDS</span><b>✳</b><span>LIVE PROGRESS</span><b>✳</b><span>SPARE PARTS</span><b>✳</b><span>HAPPY CUSTOMERS</span><b>✳</b><span>BETTER DAYS</span><b>✳</b></div></div>
 
     <section class="features shell" id="features">
-      <div class="section-intro"><div class="eyebrow"><span class="eyebrow-line"></span> ONE CONNECTED WORKFLOW</div><h2>Everything your workshop<br><em>needs to run well.</em></h2><p>Simple tools for the work that fills every day, with the right view for owners and employees.</p></div>
+      <div class="section-top">
+        <div><div class="section-label">01 / ALL THE MOVING PARTS</div><h2>Built for the work<br><span>you actually do.</span></h2></div>
+        <p>One place to run a multi-brand workshop, without losing the little details that make a big day work.</p>
+      </div>
       <div class="feature-grid">
-        <article class="feature feature-large"><span class="feature-number">01 / JOBS</span><div class="feature-art job-art"><span class="feature-art-label">JOB CARD</span><div class="art-line wide"></div><div class="art-line medium"></div><div class="art-pill">In progress</div><div class="art-line short"></div></div><h3>Keep every repair on track</h3><p>Create and assign job cards, follow work from in progress to finished, and print a clear record for the customer.</p></article>
-        <article class="feature"><span class="feature-number">02 / CUSTOMERS</span><span class="feature-glyph">◎</span><h3>Know who’s coming back</h3><p>Keep contact details and vehicle information together. Call customers or open a WhatsApp update when a job is ready.</p></article>
-        <article class="feature"><span class="feature-number">03 / STOCK</span><span class="feature-glyph">▦</span><h3>Stay on top of parts</h3><p>Track spare parts and quantities. Employees can use stock and request items when supplies run low.</p></article>
-        <article class="feature"><span class="feature-number">04 / TEAM</span><span class="feature-glyph">◷</span><h3>See the whole team’s day</h3><p>Manage employee access, attendance requests and approvals, with a monthly calendar for everyone.</p></article>
-        <article class="feature"><span class="feature-number">05 / BILLING</span><span class="feature-glyph">▤</span><h3>Finish with a professional bill</h3><p>Make estimates and invoices using your shop details, then print or share them with customers.</p></article>
-        <article class="feature feature-wide"><div><span class="feature-number">06 / OVERVIEW</span><h3>Make better decisions every day</h3><p>Owners can review daily sales, ongoing jobs and the key numbers that matter at a glance.</p></div><div class="mini-bars" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div></article>
+        <article class="feature-card feature-job"><span class="feature-id">01 — JOB CARDS</span><span class="feature-illustration job-illustration" aria-hidden="true"><span class="illus-check">✓</span><i></i><i></i><i></i></span><div><h3>From drop-off to done.</h3><p>Create, assign and update repair jobs. Print job cards and keep each service moving.</p></div><span class="feature-arrow" aria-hidden="true">↗</span></article>
+        <article class="feature-card feature-stock"><span class="feature-id">02 — INVENTORY</span><span class="feature-illustration stock-illustration" aria-hidden="true"><i></i><i></i><i></i><i></i></span><div><h3>Parts, under control.</h3><p>Track spare parts, use stock as work happens and request what has run out.</p></div><span class="feature-arrow" aria-hidden="true">↗</span></article>
+        <article class="feature-card feature-customer"><span class="feature-id">03 — CUSTOMERS</span><span class="feature-illustration customer-illustration" aria-hidden="true"><span>✳</span><span>♡</span></span><div><h3>Better customer moments.</h3><p>Keep contacts and vehicles close. Call or open a WhatsApp update when work is ready.</p></div><span class="feature-arrow" aria-hidden="true">↗</span></article>
+        <article class="feature-card feature-billing"><span class="feature-id">04 — BILLING</span><span class="feature-illustration bill-illustration" aria-hidden="true"><span>₹</span><i></i><i></i></span><div><h3>Finish the job beautifully.</h3><p>Create estimates and invoices with your workshop details, ready to print.</p></div><span class="feature-arrow" aria-hidden="true">↗</span></article>
+        <article class="feature-card feature-team"><span class="feature-id">05 — YOUR TEAM</span><span class="feature-illustration team-illustration" aria-hidden="true"><span>✓</span><span>○</span><span>✓</span></span><div><h3>Everyone knows the plan.</h3><p>Manage access, assigned work and attendance approvals with a monthly calendar.</p></div><span class="feature-arrow" aria-hidden="true">↗</span></article>
+        <article class="feature-card feature-overview"><span class="feature-id">06 — OVERVIEW</span><span class="feature-illustration overview-illustration" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><div><h3>A clearer view of today.</h3><p>See daily sales, jobs and the workshop numbers that deserve your attention.</p></div><span class="feature-arrow" aria-hidden="true">↗</span></article>
       </div>
     </section>
 
-    <section class="download-section" id="download">
-      <div class="shell">
-        <div class="download-heading"><div><div class="eyebrow"><span class="eyebrow-line"></span> WORK YOUR WAY</div><h2>Take Workshop Desk<br><em>where work happens.</em></h2></div><p>Choose the way you want to open your workshop. Your account and work follow you across devices.</p></div>
-        <div class="download-grid">
-          <article class="download-card featured"><span class="platform-icon" aria-hidden="true">▣</span><span class="card-kicker">WINDOWS PC</span><h3>Desk ready.</h3><p>Open Workshop Desk in a dedicated window on your Windows computer.</p><ul><li>Windows 10 or 11</li><li>Microsoft Edge or Chrome required</li><li>Internet connection required</li></ul><a class="download-button" href="https://raw.githubusercontent.com/kriksanta/workshopdesk/firebase-spark-migration/desktop/Workshop-Desk.exe">Download for Windows <span aria-hidden="true">↓</span></a><small>Open the downloaded file to launch the app.</small></article>
-          <article class="download-card"><span class="platform-icon" aria-hidden="true">▥</span><span class="card-kicker">ANDROID & IPHONE</span><h3>Workshop in your pocket.</h3><p>Open the app on your phone and add it to your home screen for quick access.</p><ul><li>Android: open in Chrome, then tap Install app</li><li>iPhone: open in Safari, then Share → Add to Home Screen</li></ul><a class="download-button outline" href="https://workshop-desk.web.app/">Open mobile app <span aria-hidden="true">↗</span></a><small>Home screen installation is confirmed in your browser.</small></article>
-          <article class="download-card"><span class="platform-icon" aria-hidden="true">◉</span><span class="card-kicker">CLOUD ACCESS</span><h3>Start right away.</h3><p>Use Workshop Desk directly in your browser on a computer or tablet.</p><ul><li>No download needed</li><li>Sign in to your workshop account</li><li>Pick up where your team left off</li></ul><a class="download-button outline" href="https://workshop-desk.web.app/">Open in browser <span aria-hidden="true">↗</span></a><small>Works with a current browser and internet connection.</small></article>
+    <section class="workflow" id="how-it-works">
+      <div class="shell workflow-inner">
+        <div class="workflow-heading"><div class="section-label">02 / SEE THE FLOW</div><h2>One workshop.<br><span>One smooth rhythm.</span></h2><p>Tap a step to see how Workshop Desk keeps the day connected.</p></div>
+        <div class="workflow-panel">
+          <div class="workflow-steps" role="tablist" aria-label="Workshop workflow">
+            <button type="button" class="active" role="tab" aria-selected="true" aria-controls="workflow-card" data-step="0"><span>01</span> Welcome the customer <b>↗</b></button>
+            <button type="button" role="tab" aria-selected="false" aria-controls="workflow-card" data-step="1"><span>02</span> Put the team on it <b>↗</b></button>
+            <button type="button" role="tab" aria-selected="false" aria-controls="workflow-card" data-step="2"><span>03</span> Keep progress visible <b>↗</b></button>
+            <button type="button" role="tab" aria-selected="false" aria-controls="workflow-card" data-step="3"><span>04</span> Send them on their way <b>↗</b></button>
+          </div>
+          <div class="workflow-card" id="workflow-card" role="tabpanel" aria-live="polite">
+            <div class="workflow-card-top"><span id="flow-eyebrow">FIRST STOP</span><span class="flow-badge">WORKSHOP FLOW</span></div>
+            <div class="flow-orbit"><span id="flow-symbol" aria-hidden="true">◎</span></div>
+            <h3 id="flow-title">Start with the full picture.</h3>
+            <p id="flow-description">Save the customer's details and vehicle, then open a job card before the work begins.</p>
+            <div class="flow-bottom"><span id="flow-note">Customer → Vehicle → Job card</span><span>STEP <strong id="flow-number">01</strong> / 04</span></div>
+          </div>
         </div>
       </div>
     </section>
 
-    <section class="closing shell"><div class="closing-mark"><img src="./logo.png" alt=""></div><div><span class="eyebrow">READY WHEN YOU ARE</span><h2>Make room for the work<br>that matters.</h2></div><a class="button button-primary" href="#download">Get started <span aria-hidden="true">↗</span></a></section>
+    <section class="downloads shell" id="download">
+      <div class="section-top download-top"><div><div class="section-label">03 / YOUR WORKSHOP, YOUR WAY</div><h2>Pick your place.<br><span>Get to work.</span></h2></div><p>At the desk, beside a car or on the move—choose the way you want to open Workshop Desk.</p></div>
+      <div class="download-grid">
+        <article class="download-card download-windows"><div class="download-icon" aria-hidden="true">▣</div><span class="download-platform">WINDOWS PC</span><h3>A proper desk view.</h3><p>Open Workshop Desk in a dedicated window on your computer, ready for the day.</p><div class="download-details"><span>Windows 10 or 11</span><span>Edge or Chrome required</span><span>Internet connection required</span></div><a class="download-link" href="https://raw.githubusercontent.com/kriksanta/workshopdesk/firebase-spark-migration/desktop/Workshop-Desk.exe">Download for Windows <span aria-hidden="true">↓</span></a><small>Open the downloaded file to launch the app.</small></article>
+        <article class="download-card download-mobile"><div class="download-icon" aria-hidden="true">▥</div><span class="download-platform">ANDROID & IPHONE</span><h3>Your pocket companion.</h3><p>Open Workshop Desk on your phone and add it to your home screen for one-tap access.</p><div class="download-details"><span>Android: Chrome → Install app</span><span>iPhone: Safari → Share → Add to Home Screen</span></div><a class="download-link" href="https://workshop-desk.web.app/">Open mobile app <span aria-hidden="true">↗</span></a><small>Your browser will confirm home screen installation.</small></article>
+        <article class="download-card download-cloud"><div class="download-icon" aria-hidden="true">◉</div><span class="download-platform">CLOUD ACCESS</span><h3>Just open and go.</h3><p>Use Workshop Desk straight from your browser on a computer or tablet.</p><div class="download-details"><span>No download needed</span><span>Sign in to your workshop</span><span>Pick up where your team left off</span></div><a class="download-link" href="https://workshop-desk.web.app/">Open in browser <span aria-hidden="true">↗</span></a><small>Works with a current browser and internet connection.</small></article>
+      </div>
+    </section>
+
+    <section class="closing"><div class="shell closing-inner"><span class="closing-star" aria-hidden="true">✳</span><div><div class="section-label">THE NEXT JOB STARTS HERE</div><h2>Ready for a <em>better kind of busy?</em></h2></div><a class="btn btn-dark" href="#download">Get Workshop Desk <span aria-hidden="true">↗</span></a></div></section>
   </main>
-  <footer class="site-footer"><div class="shell footer-inner"><span class="footer-brand"><img src="./logo.png" alt=""> Workshop Desk</span><span>Built for the rhythm of a real workshop.</span><a href="https://workshop-desk.web.app/">Open app ↗</a></div></footer>
+  <footer class="site-footer"><div class="shell footer-inner"><a class="brand" href="#top"><span class="brand-icon"><img src="./logo.png" alt=""></span><span>workshop<span class="brand-dot">.</span>desk</span></a><span>Made for the rhythm of a real workshop.</span><a href="https://workshop-desk.web.app/">Open app ↗</a></div></footer>
 </body>
 </html>

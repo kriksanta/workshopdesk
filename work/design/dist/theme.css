@@ -378,3 +378,8 @@ input[type=file]::file-selector-button { background: var(--surface-alt); color: 
 .profile-trigger[aria-expanded=true] .profile-chevron{transform:rotate(180deg);}
 
 .topbar .top-actions>[data-action="platform-logout"]{display:none!important;}
+
+.brand-logo-tile{display:flex;align-items:center;justify-content:center;width:112px;height:72px;max-width:100%;margin-bottom:15px;padding:7px;background:#fff;border:1px solid #D9E2ED;border-radius:12px;}
+.brand-logo-tile img{display:block;max-width:100%;width:100px;height:56px;object-fit:contain;}
+.brand-logo-fallback{background:var(--surface-alt);color:var(--primary);font-weight:700;font-size:22px;}
+#brand-logo-preview{margin-top:14px;}

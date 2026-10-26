@@ -24,15 +24,23 @@ async function identify(user){
 }
 async function loginEmail(email,password){const c=await signInWithEmailAndPassword(auth,email.toLowerCase()==='admin'?adminEmail:email,password);return identify(c.user)}
 async function loginOwner(){const c=await signInWithPopup(auth,new GoogleAuthProvider());return identify(c.user)}
-function watchAuth(cb){return onAuthStateChanged(auth,async u=>{
- profileOff?.();profileOff=null;
- try{
-  current=await identify(u);cb(current,null);
-  if(u&&!current?.platformAdmin)profileOff=onSnapshot(profile(u.uid),s=>{
-   if(!s.exists()||s.data().active!==true){stop();current=null;signOut(auth).catch(()=>{});cb(null,new Error('This account was removed. Ask the admin to restore it.'))}
-  },e=>cb(null,e));
- }catch(e){current=null;cb(null,e)}
-})}
+function watchAuth(cb){
+ let version=0;
+ const unsubscribe=onAuthStateChanged(auth,async u=>{
+  const event=++version;
+  profileOff?.();profileOff=null;stop();current=null;
+  try{
+   const account=await identify(u);
+   if(event!==version)return;
+   current=account;cb(account,null);
+   if(u&&!account?.platformAdmin)profileOff=onSnapshot(profile(u.uid),s=>{
+    if(event!==version)return;
+    if(!s.exists()||s.data().active!==true){stop();current=null;signOut(auth).catch(()=>{});cb(null,new Error('This account was removed. Ask the admin to restore it.'))}
+   },e=>{if(event===version)cb(null,e)});
+  }catch(e){if(event!==version)return;current=null;cb(null,e)}
+ });
+ return ()=>{version++;unsubscribe();profileOff?.();profileOff=null;stop();current=null};
+}
 function stop(){off.forEach(f=>f());off=[]}
 function view(raw){
  const result={admin:raw.config?.admin||{name:current?.name||'Workshop Admin',username:current?.email||''},settings:raw.config?.settings||{name:'Your Workshop',address:'',phone:'',gst:'',logo:'',footer:'Thank you for trusting us with your car. Drive safe!',currency:'INR'}};

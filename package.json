@@ -1,1 +1,1 @@
-{"name":"workshopdesk-firebase","private":true,"type":"module","scripts":{"build:firebase":"node work/firebase/build.mjs","test:firebase":"node work/firebase/test.mjs"},"dependencies":{"firebase":"^12.5.0"},"devDependencies":{"esbuild":"^0.25.12"}}
+{"name":"workshopdesk-firebase","private":true,"type":"module","scripts":{"build:firebase":"node work/firebase/build.mjs","test:firebase":"node work/firebase/test.mjs && node work/firebase/session.test.mjs"},"dependencies":{"firebase":"^12.5.0"},"devDependencies":{"esbuild":"^0.25.12"}}

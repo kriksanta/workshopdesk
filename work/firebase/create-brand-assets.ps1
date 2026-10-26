@@ -42,6 +42,8 @@ try {
   } finally { $mark.Dispose(); $scaled.Dispose() }
 } finally { $source.Dispose() }
 
+foreach ($size in @(192,512)) { Copy-Item -LiteralPath (Join-Path $dist "icon-$size.png") -Destination (Join-Path $dist "icon-$size-blue.png") }
+
 # Keep the public download page and Windows launcher on the same brand assets.
 $website = Join-Path $Root 'work\website'
 if (Test-Path -LiteralPath $website) {

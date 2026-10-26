@@ -13,7 +13,7 @@ for (const file of ['style.css', 'theme.css']) {
   html = html.replace('<link rel="stylesheet" href="' + file + '">', () => '<style>' + read(file) + '</style>');
 }
 html = html.replace('<link rel="manifest" href="manifest.webmanifest">', '');
-for (const file of ['favicon-48.png', 'icon-192.png']) {
+for (const file of ['favicon-48.png', 'icon-192.png', 'icon-192-blue.png']) {
   for (const suffix of ['', '?v=blue1']) html = html.replace('href="' + file + suffix + '"', 'href="data:image/png;base64,' + fs.readFileSync(path.join(source,file)).toString('base64') + '"');
 }
 for (const file of ['theme.js', 'catalog.js', 'attendance.js', 'account-install.js', 'app.js']) {

@@ -1,8 +1,22 @@
 'use strict';
 const wd={baseline:'',saving:false,loading:true,pending:null,authOff:null,ownersOff:null,authVersion:0};
 const PAGE_KEY='workshopdesk.firebase.page.v1';
-function rememberPage(){if(!session||wd.loading)return;try{localStorage.setItem(PAGE_KEY,JSON.stringify({page,role,jobFilter}))}catch{}}
-function restorePage(){try{const s=JSON.parse(localStorage.getItem(PAGE_KEY)||'{}');if(navItems.some(([n])=>n===s.page))page=s.page;if(s.role==='employee'&&session?.admin)role='employee';jobFilter=s.jobFilter||'All jobs'}catch{}}
+function rememberPage(){
+ if(!session||wd.loading)return;
+ const saved={page,role,jobFilter};
+ try{localStorage.setItem(PAGE_KEY,JSON.stringify(saved));}catch{}
+ try{sessionStorage.setItem(PAGE_KEY,JSON.stringify(saved));}catch{}
+ try{const route=new URLSearchParams({page,view:role});history.replaceState(null,'',location.pathname+location.search+'#'+route.toString());}catch{}
+}
+function restorePage(){
+ let saved={};
+ try{saved=JSON.parse(localStorage.getItem(PAGE_KEY)||'{}');}catch{}
+ try{const own=JSON.parse(sessionStorage.getItem(PAGE_KEY)||'null');if(own)saved=own;}catch{}
+ try{const route=new URLSearchParams(location.hash.slice(1));if(route.has('page'))saved={...saved,page:route.get('page'),role:route.get('view')};}catch{}
+ if(navItems.some(([name])=>name===saved.page))page=saved.page;
+ if(session?.admin)role=saved.role==='employee'?'employee':'employer';
+ jobFilter=saved.jobFilter||'All jobs';
+}
 function hydrate(data){for(const k of Object.keys(state))delete state[k];Object.assign(state,data);wd.baseline=JSON.stringify(state);today=day();}
 function render(){if(wd.loading){renderAuthLoading();return}renderLocal();rememberPage();if(session&&!wd.loading&&!wd.saving&&wd.baseline&&JSON.stringify(state)!==wd.baseline)saveRemote();}
 function busy(value){document.getElementById('sync-mask')?.remove();if(value){const el=document.createElement('div');el.id='sync-mask';el.setAttribute('role','status');el.textContent='Saving workshop changes…';el.style.cssText='position:fixed;inset:0;z-index:99999;background:#fffffff0;display:grid;place-items:center;font:600 18px system-ui;color:#164e46';document.body.append(el)}}

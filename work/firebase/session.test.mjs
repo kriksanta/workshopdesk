@@ -80,3 +80,19 @@ function authFixture(){
 assert.doesNotMatch(bridge,/location\.reload\(/);
 console.log('Session restoration passed: owner/employee refresh, saved route, no reload after login, retry, and stale callbacks after sign-out.');
 
+
+// Each tab restores its visible route even when another tab last saved Invoices.
+{
+ const x=appFixture();const local=x.storage;
+ local.set('workshopdesk.firebase.page.v1',JSON.stringify({page:'Invoices & estimates',role:'employer'}));
+ x.context.navItems.push(['Customers','users'],['Inventory','box'],['Invoices & estimates','receipt']);
+ x.context.URLSearchParams=URLSearchParams;
+ x.context.location={pathname:'/',search:'',hash:'#page=Customers&view=employer'};
+ x.context.history={replaceState(a,b,url){x.context.location.hash=url.slice(url.indexOf('#'));}};
+ await x.context.api.firebaseBoot();await x.auth(owner,null);x.data(record(),null);
+ assert.equal(x.context.page,'Customers');
+ x.context.page='Inventory';x.context.api.render();assert.match(x.context.location.hash,/page=Inventory/);
+ local.set('workshopdesk.firebase.page.v1',JSON.stringify({page:'Invoices & estimates',role:'employer'}));
+ await x.context.api.firebaseBoot();await x.auth(owner,null);x.data(record(),null);
+ assert.equal(x.context.page,'Inventory');
+}

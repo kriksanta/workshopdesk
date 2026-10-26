@@ -287,3 +287,38 @@ input[type=file]::file-selector-button { background: var(--surface-alt); color: 
 @media(prefers-reduced-motion:reduce) {
   *,*:before,*:after { transition-duration: .01ms!important; animation-duration: .01ms!important; }
 }
+
+/* The utility bar belongs to the whole app, including the sign-in screen. */
+:root { --app-toolbar-height:78px; }
+.topbar,.login-top {
+  position:fixed; inset:0 0 auto 0; z-index:35;
+  width:100%; height:auto; min-height:calc(70px + env(safe-area-inset-top));
+  display:flex; align-items:center; justify-content:space-between; gap:14px;
+  padding:calc(12px + env(safe-area-inset-top)) max(24px,env(safe-area-inset-right)) 12px max(24px,env(safe-area-inset-left));
+  background:var(--surface); color:var(--text); border:0; border-bottom:1px solid var(--border);
+  box-shadow:0 3px 14px rgba(11,20,36,.035);
+}
+.main { padding-top:var(--app-toolbar-height); }
+.sidebar { top:var(--app-toolbar-height); bottom:0; }
+.login-shell { padding-top:var(--app-toolbar-height); }
+.login-top { justify-content:flex-end; }
+.login-top>.pill { margin-right:auto; }
+.login-top .theme-toggle { margin-left:0; }
+#app>.main { margin-left:0; width:100%; }
+@media(max-width:640px) {
+  .topbar,.login-top {
+    min-height:calc(62px + env(safe-area-inset-top)); flex-wrap:wrap; gap:8px;
+    padding:calc(10px + env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) 10px max(12px,env(safe-area-inset-left));
+  }
+  .topbar .breadcrumb { flex:0 1 auto; min-width:0; }
+  .topbar .breadcrumb strong { max-width:160px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .topbar .top-actions { flex:0 1 auto; margin-left:auto; }
+  .login-top { flex-wrap:nowrap; }
+}
+@media(display-mode:fullscreen),(display-mode:standalone) {
+  body { padding-top:0; }
+  .sidebar { top:var(--app-toolbar-height); }
+}
+@media print {
+  .topbar,.login-top { display:none!important; }
+}

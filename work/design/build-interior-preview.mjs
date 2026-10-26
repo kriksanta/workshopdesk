@@ -16,7 +16,7 @@ html = html.replace('<link rel="manifest" href="manifest.webmanifest">', '');
 for (const file of ['favicon-48.png', 'icon-192.png', 'icon-192-blue.png']) {
   for (const suffix of ['', '?v=blue1']) html = html.replace('href="' + file + suffix + '"', 'href="data:image/png;base64,' + fs.readFileSync(path.join(source,file)).toString('base64') + '"');
 }
-for (const file of ['theme.js', 'catalog.js', 'attendance.js', 'account-install.js', 'app.js']) {
+for (const file of ['theme.js', 'app-chrome.js', 'catalog.js', 'attendance.js', 'account-install.js', 'app.js']) {
   let content = read(file).replaceAll('brand-logo.png', logo);
   if (file === 'app.js') content = content
     .replaceAll('Design preview · One example workflow · Changes reset on refresh', 'INTERIOR PREVIEW · Sample records only')

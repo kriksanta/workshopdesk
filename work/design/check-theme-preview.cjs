@@ -34,11 +34,11 @@ function scenario(saved,systemDark,denied=false){
 scenario(null,false);scenario(null,true);scenario('light',true);scenario('dark',false);scenario('invalid',true);scenario(null,true,true);
 const html=fs.readFileSync(process.argv[2],'utf8');
 const scripts=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)];
-assert.equal(scripts.length,6);scripts.forEach((m,i)=>new vm.Script(m[1],{filename:'inline-'+i}));
+assert.equal(scripts.length,7);scripts.forEach((m,i)=>new vm.Script(m[1],{filename:'inline-'+i}));
 assert(!/<script src=/.test(html));assert(!/href="(?:theme|style)\.css"/.test(html));
 function luminance(hex){return hex.match(/\w\w/g).map(x=>parseInt(x,16)/255).map(x=>x<=.04045?x/12.92:((x+.055)/1.055)**2.4).reduce((a,v,i)=>a+v*[.2126,.7152,.0722][i],0)}
 function contrast(a,b){const l=[luminance(a),luminance(b)].sort((a,b)=>b-a);return((l[0]+.05)/(l[1]+.05)).toFixed(2)}
 console.log('Theme behavior: device default, saved preference, click, re-render and unavailable storage passed.');
-console.log('Preview: all 6 inline scripts parse; CSS, scripts and logos are embedded.');
+console.log('Preview: all 7 inline scripts parse; CSS, scripts and logos are embedded.');
 for(const [name,a,b]of [['Day text','1C3455','FFFFFF'],['Night text','F5F8FF','17253B'],['Day button','FFFFFF','285B94'],['Night button','0B1424','6EA4E8'],['Day secondary','687B94','FFFFFF'],['Night secondary','A7B7CE','17253B']])console.log(name+' contrast '+contrast(a,b)+':1');
 

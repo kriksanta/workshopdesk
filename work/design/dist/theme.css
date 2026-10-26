@@ -288,7 +288,8 @@ input[type=file]::file-selector-button { background: var(--surface-alt); color: 
   *,*:before,*:after { transition-duration: .01ms!important; animation-duration: .01ms!important; }
 }
 
-/* The utility bar belongs to the whole app, including the sign-in screen. */
+/* Pin the utility bar on mobile only; desktop keeps its original layout. */
+@media(max-width:640px) {
 :root { --app-toolbar-height:78px; }
 .topbar,.login-top {
   position:fixed; inset:0 0 auto 0; z-index:35;
@@ -319,6 +320,13 @@ input[type=file]::file-selector-button { background: var(--surface-alt); color: 
   body { padding-top:0; }
   .sidebar { top:var(--app-toolbar-height); }
 }
+}
+#app>.main { margin-left:0; width:100%; }
 @media print {
   .topbar,.login-top { display:none!important; }
+}
+
+/* Installation controls are reserved for mobile screens. */
+@media(min-width:641px) {
+  [data-action=install-app] { display:none!important; }
 }

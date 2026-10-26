@@ -77,3 +77,12 @@ document.addEventListener('click',event=>{
  input.click();
 });
 
+
+document.addEventListener('click',async e=>{
+ const button=e.target.closest('[data-action="reset-employee-password"]');
+ if(!button||button.disabled||!session?.admin||role!=='employer')return;
+ button.disabled=true;
+ try{const email=await WDF.resetEmployeePassword(button.dataset.id);toastLocal('Password reset email sent to '+email+'. The employee can choose a new password and sign in with their email.');}
+ catch(error){toastLocal(WDF.authError(error));}
+ finally{button.disabled=false;}
+});

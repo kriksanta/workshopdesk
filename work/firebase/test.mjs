@@ -45,3 +45,7 @@ assert.match(app,/Remove owner/);
 assert.match(app,/Restore/);
 for(const f of ['app.js','firebase-runtime.js']){const r=spawnSync(process.execPath,['--check',new URL('../../firebase-public/'+f,import.meta.url).pathname.replace(/^\/(?:[A-Za-z]:)/,x=>x.slice(1))],{encoding:'utf8'});assert.equal(r.status,0,r.stderr)}
 console.log('Firebase adapter and generated app checks passed.');
+
+assert.match(app,/reset-employee-password/);
+assert.match(app,/Send password reset email/);
+assert.match(app,/They choose their password from that email/);

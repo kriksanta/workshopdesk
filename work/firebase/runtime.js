@@ -130,12 +130,20 @@ async function setOwnerActive(uid,active){
  if(!current?.admin||!current.workshopId)throw new Error('Owner permission required.');
  const uid=await makeAuthAccount(employeeData.email);
  await setProfile(uid,employeeData.id,true);
- await sendPasswordResetEmail(auth,employeeData.email);
+ await sendPasswordResetEmail(auth,employeeData.email,{url:'https://workshop-desk.web.app/'});
  return uid;
 }
 async function setProfile(uid,employeeId,active){
  if(!current?.admin||!current.workshopId)throw new Error('Owner permission required.');
  await setDoc(profile(uid),{role:'employee',workshopId:current.workshopId,employeeId,active,updatedAt:serverTimestamp()});
+}
+async function resetEmployeePassword(employeeId){
+ if(!current?.admin||!current.workshopId)throw new Error('Owner permission required.');
+ const snapshot=await getDoc(ref('employees',employeeId));
+ const person=snapshot.exists()?snapshot.data():null;
+ if(!person?.authUid||person.active===false||!person.email)throw new Error('This employee has no active email login.');
+ await sendPasswordResetEmail(auth,person.email.trim().toLowerCase(),{url:'https://workshop-desk.web.app/'});
+ return person.email;
 }
 async function resetPassword(email){await sendPasswordResetEmail(auth,email.toLowerCase()==='admin'?adminEmail:email)}
 async function logout(){stop();await signOut(auth)}
@@ -147,4 +155,4 @@ async function seed(seedData){
  for(const part of seedData.inventory)batch.set(ref('inventory',part.id),clean('inventory',part));
  await batch.commit();
 }
-window.WDF={auth,db,get owner(){return current?.email||''},adminEmail,rows,authError,identify,loginEmail,loginOwner,watchAuth,watchData,watchOwners,setOwnerActive,stop,save,provision,setProfile,resetPassword,inviteOwner,logout,seed};
+window.WDF={auth,db,get owner(){return current?.email||''},adminEmail,rows,authError,identify,loginEmail,loginOwner,watchAuth,watchData,watchOwners,setOwnerActive,stop,save,provision,setProfile,resetPassword,resetEmployeePassword,inviteOwner,logout,seed};

@@ -35,7 +35,7 @@
     actions.querySelectorAll('.role-picker button').forEach(button=>{const copy=button.cloneNode(true);copy.className='';copy.setAttribute('aria-pressed',String(button.classList.contains('selected')));menu.append(copy);});
     const settings=document.querySelector('.sidebar [data-action="nav"][data-page="Settings"]');
     if(settings){const copy=settings.cloneNode(true);copy.className='';copy.textContent='Settings';menu.append(copy);}
-    const logout=actions.querySelector('[data-action="logout"]');
+    const logout=actions.querySelector('[data-action="logout"],[data-action="platform-logout"]');
     if(logout){const copy=logout.cloneNode(true);copy.className='';copy.textContent='Logout';menu.append(copy);}
     actions.append(box);
     const trigger=box.querySelector('.profile-trigger');

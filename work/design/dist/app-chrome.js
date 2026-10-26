@@ -30,7 +30,7 @@
     const actions=document.querySelector('.topbar .top-actions');
     if(!actions||actions.querySelector('.mobile-profile'))return;
     const box=document.createElement('div');box.className='mobile-profile';
-    box.innerHTML='<button class="profile-trigger" aria-label="Open profile menu" aria-expanded="false"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 22v-2a8 8 0 0 1 16 0v2"/></svg></button><div class="profile-menu" hidden><div class="profile-caption">Your profile</div></div>';
+    box.innerHTML='<button class="profile-trigger" aria-label="Open profile menu" aria-haspopup="menu" aria-expanded="false"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 22v-2a8 8 0 0 1 16 0v2"/></svg><svg class="profile-chevron" viewBox="0 0 12 8" aria-hidden="true"><path d="m2 2 4 4 4-4"/></svg></button><div class="profile-menu" hidden><div class="profile-caption">Your profile</div></div>';
     const menu=box.querySelector('.profile-menu');
     actions.querySelectorAll('.role-picker button').forEach(button=>{const copy=button.cloneNode(true);copy.className='';copy.setAttribute('aria-pressed',String(button.classList.contains('selected')));menu.append(copy);});
     const settings=document.querySelector('.sidebar [data-action="nav"][data-page="Settings"]');

@@ -371,3 +371,8 @@ input[type=file]::file-selector-button { background: var(--surface-alt); color: 
 }
 .topbar .mobile-profile{display:block!important;}
 .profile-menu button[aria-pressed=true]{background:var(--surface-alt);font-weight:700;}
+
+/* A visible cue for the account dropdown on every screen. */
+.profile-trigger{position:relative;}
+.profile-trigger .profile-chevron{position:absolute;right:-5px;bottom:-2px;width:16px;height:12px;padding:2px;background:var(--surface-alt);border-radius:6px;stroke:currentColor;stroke-width:1.7;fill:none;transition:transform .2s;}
+.profile-trigger[aria-expanded=true] .profile-chevron{transform:rotate(180deg);}

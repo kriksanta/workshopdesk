@@ -29,7 +29,7 @@ before=copy(after);after=copy(before);after.invoices=[];
 assert.deepEqual(Array.from(context.compute(before,after),x=>x.type),['invoices']);
 const app=fs.readFileSync(new URL('../../firebase-public/app.js',import.meta.url),'utf8');
 assert.doesNotMatch(app,/\nrenderLocal\(\);\s*firebaseBoot\(\);/,'Startup must wait for restored authentication.');
-assert.match(app,/Sign in with Google/);assert.match(app,/Forgot password/);assert.match(app,/Invite owner/);assert.match(app,/Employee login email/);assert.doesNotMatch(app,/google\.script\.run|ADMIN_PASSWORD_HASH/);
+assert.doesNotMatch(app,/data-action="google-login"/);assert.match(app,/Forgot password/);assert.match(app,/Invite owner/);assert.match(app,/Employee login email/);assert.doesNotMatch(app,/google\.script\.run|ADMIN_PASSWORD_HASH/);
 const rules=fs.readFileSync(new URL('../../firestore.rules',import.meta.url),'utf8');
 assert.match(rules,/match \/workshops\/\{wid\}/);
 assert.match(rules,/function platformAdmin\(\)/);

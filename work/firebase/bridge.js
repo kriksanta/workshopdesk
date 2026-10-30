@@ -20,7 +20,7 @@ function restorePage(){
 function hydrate(data){for(const k of Object.keys(state))delete state[k];Object.assign(state,data);wd.baseline=JSON.stringify(state);today=day();}
 function render(){if(wd.loading){renderAuthLoading();return}renderLocal();rememberPage();if(session&&!wd.loading&&!wd.saving&&wd.baseline&&JSON.stringify(state)!==wd.baseline)saveRemote();}
 function busy(value){document.getElementById('sync-mask')?.remove();if(value){const el=document.createElement('div');el.id='sync-mask';el.setAttribute('role','status');el.textContent='Saving workshop changes…';el.style.cssText='position:fixed;inset:0;z-index:99999;background:#fffffff0;display:grid;place-items:center;font:600 18px system-ui;color:#164e46';document.body.append(el)}}
-function applyLatest(data){if(!data)return;if(document.querySelector('#modal-form')||wd.saving){wd.pending=data;return}const old=wd.baseline;if(JSON.stringify(state)!==old){wd.pending=data;return}hydrate(data);renderLocal();rememberPage();}
+function applyLatest(data){if(!data)return;if(document.querySelector('#modal-form,#brand-editor,#parts-bill-form')||wd.saving){wd.pending=data;return}const old=wd.baseline;if(JSON.stringify(state)!==old){wd.pending=data;return}hydrate(data);renderLocal();rememberPage();}
 async function saveRemote(){
  if(wd.saving)return;wd.saving=true;busy(true);
  const before=JSON.parse(wd.baseline),after=JSON.parse(JSON.stringify(state));

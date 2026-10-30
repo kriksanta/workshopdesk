@@ -31,3 +31,9 @@ assert.match(context.api.partsBillDocument(external.bill),/Custom outside part/)
 const mixed=context.api.preparePartsBill({...data,discount:'0'},[{part:'p1',name:'Oil filter',qty:2,price:150},{part:'p1',outsourced:true,name:'Outside filter',qty:10,price:200}],true);
 assert.equal(mixed.stock[0].stock,3);assert.equal(mixed.bill.lines[0].outsourced,false);
 console.log('Outsourced parts bypass inventory and remain unlabelled on customer documents.');
+
+// All document types retain every row when their content spans multiple pages.
+for(const document of [result.bill,{...labour,type:'Invoice'},{...labour,type:'Estimate'}]){
+ const long={...document,lines:Array.from({length:20},(_,n)=>({name:'Work or part '+(n+1),qty:1,price:100}))};
+ const html=context.billDocument(long);assert.equal((html.match(/Work or part /g)||[]).length,20);assert.match(html,/Work or part 20/);assert.match(html,/doc-total/);
+}

@@ -403,3 +403,13 @@ input[type=file]::file-selector-button { background: var(--surface-alt); color: 
 .pdf-export .document{width:718px;max-width:none;margin:0;padding:20px;box-sizing:border-box;}
 .pdf-export table{width:100%;}
 .pdf-export tr,.pdf-export .doc-total,.pdf-export .doc-sign{break-inside:avoid;}
+
+/* Shared document pagination for invoices, estimates and spare-parts bills. */
+.document table{table-layout:fixed;}
+.document td,.document th{overflow-wrap:anywhere;}
+.document thead{display:table-header-group;}
+@media print{
+  #print-root,.document,.document table,.document tbody{height:auto!important;max-height:none!important;overflow:visible!important;break-inside:auto;}
+  .document tr,.doc-total,.doc-sign,.doc-details{break-inside:avoid;page-break-inside:avoid;}
+  .document thead{display:table-header-group;}
+}

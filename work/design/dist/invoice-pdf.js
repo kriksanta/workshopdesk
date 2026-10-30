@@ -10,7 +10,7 @@ async function createInvoicePdf(i){
  await loadInvoicePdfLibrary();
  const wrapper=document.createElement('div');wrapper.className='pdf-export';wrapper.innerHTML=billDocument(i);document.body.append(wrapper);
  try{if(document.fonts?.ready)await document.fonts.ready;await Promise.all([...wrapper.querySelectorAll('img')].map(img=>img.complete?Promise.resolve():new Promise(resolve=>{img.onload=resolve;img.onerror=resolve;})));
- const blob=await window.html2pdf().set({margin:10,filename:invoicePdfFilename(i),image:{type:'jpeg',quality:.96},html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff',windowWidth:794,scrollX:0,scrollY:0},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},enableLinks:false,pagebreak:{mode:['css','legacy'],avoid:['tr','.doc-header','.doc-details','.doc-total','.doc-sign']}}).from(wrapper.firstElementChild).outputPdf('blob');
+ const blob=await window.html2pdf().set({margin:10,filename:invoicePdfFilename(i),image:{type:'jpeg',quality:.96},html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff',windowWidth:794,scrollX:0,scrollY:0},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},enableLinks:false,pagebreak:{mode:['css','legacy'],avoid:['tr','.doc-header','.doc-details','.doc-total','.doc-sign','.doc-note']}}).from(wrapper.firstElementChild).outputPdf('blob');
  return new File([blob],invoicePdfFilename(i),{type:'application/pdf'});
  }finally{wrapper.remove();}
 }

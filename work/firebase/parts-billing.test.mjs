@@ -24,3 +24,10 @@ const labour={...result.bill,kind:undefined,job:'job1',lines:[{name:'Oil change 
 const labourHtml=context.billDocument(labour);assert.match(labourHtml,/<th>Labour cost<\/th>/);assert.doesNotMatch(labourHtml,/<th>Qty<\/th>/);
 const estimateHtml=context.billDocument({...labour,type:'Estimate'});assert.match(estimateHtml,/<th>Qty<\/th>/);
 assert.match(context.api.partsBillDocument(result.bill),/<th>Qty<\/th>/);
+
+const external=context.api.preparePartsBill({...data,discount:'0'},[{part:'missing',outsourced:true,name:'Custom outside part',qty:12,price:250}],true);
+assert.equal(external.stock.length,0);assert.equal(external.bill.lines[0].part,'');assert.equal(external.bill.lines[0].outsourced,true);assert.equal(external.bill.lines[0].qty,12);assert.equal(external.bill.lines[0].price,250);
+assert.match(context.api.partsBillDocument(external.bill),/Custom outside part/);assert.doesNotMatch(context.api.partsBillDocument(external.bill),/outsourced/i);
+const mixed=context.api.preparePartsBill({...data,discount:'0'},[{part:'p1',name:'Oil filter',qty:2,price:150},{part:'p1',outsourced:true,name:'Outside filter',qty:10,price:200}],true);
+assert.equal(mixed.stock[0].stock,3);assert.equal(mixed.bill.lines[0].outsourced,false);
+console.log('Outsourced parts bypass inventory and remain unlabelled on customer documents.');

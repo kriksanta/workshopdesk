@@ -3,7 +3,7 @@ const src=fs.readFileSync(new URL('../design/dist/parts-billing.js',import.meta.
 const state={inventory:[{id:'p1',name:'Oil filter',stock:5,price:150}],invoices:[],jobs:[],customers:[],settings:{name:'Test shop',footer:'Thank you'}};
 const context={state,Date,Math,Map,Number,document:{addEventListener(){}},customer:()=>({name:'Legacy customer'}),esc:x=>String(x??'').replace(/</g,'&lt;'),money:n=>'INR '+n,total:i=>(i.lines.reduce((s,l)=>s+l.qty*l.price,0)-i.discount)*(1+i.tax/100),documentHeader:(type,id)=>type+' '+id};
 const app=fs.readFileSync(new URL('../design/dist/app.js',import.meta.url),'utf8');const print=app.slice(app.indexOf('function billDocument('),app.indexOf('function jobDocument('));
-vm.runInNewContext(print+src+';globalThis.api={preparePartsBill,partsBillDocument,invoiceCustomer};',context);
+vm.runInNewContext(print+src+';globalThis.api={preparePartsBill,partsBillDocument,invoiceCustomer,partsBillStockReturn};',context);
 const data={buyerName:'Walk-in buyer',buyerPhone:'9000000000',buyerAddress:'Kochi',date:'2026-10-30',payment:'Paid',discount:'10',tax:'18'};
 const lines=[{part:'p1',name:'Oil filter',qty:2,price:150},{part:'p1',name:'Oil filter',qty:1,price:150},{part:'',name:'Washer',qty:1,price:10}];
 const result=context.api.preparePartsBill(data,lines,true);assert.equal(result.bill.kind,'spare-parts');assert.equal(result.bill.job,'');assert.equal(result.stock[0].stock,2);assert.equal(result.bill.paidDate,data.date);assert.equal(context.total(result.bill),531);assert.equal(state.inventory[0].stock,5,'Validation does not mutate stock.');
@@ -37,3 +37,14 @@ for(const document of [result.bill,{...labour,type:'Invoice'},{...labour,type:'E
  const long={...document,lines:Array.from({length:20},(_,n)=>({name:'Work or part '+(n+1),qty:1,price:100}))};
  const html=context.billDocument(long);assert.equal((html.match(/Work or part /g)||[]).length,20);assert.match(html,/Work or part 20/);assert.match(html,/doc-total/);
 }
+
+const returned=context.api.partsBillStockReturn(result.bill);assert.equal(returned[0].stock,8);assert.equal(state.inventory[0].stock,5);
+assert.equal(context.api.partsBillStockReturn({...result.bill,stockDeducted:false}).length,0);
+assert.equal(context.api.partsBillStockReturn(labour).length,0);
+assert.equal(context.api.partsBillStockReturn(external.bill).length,0);
+assert.equal(context.api.partsBillStockReturn(mixed.bill)[0].stock,7);
+assert.throws(()=>context.api.partsBillStockReturn({...result.bill,lines:[{part:'missing',qty:1}]}),/missing/);
+const deleted=JSON.parse(JSON.stringify(before));deleted.inventory[0].stock=8;
+const existing=JSON.parse(JSON.stringify(before));existing.invoices=[result.bill];
+assert.deepEqual(Array.from(adapter.compute(existing,deleted),x=>x.type),['inventory','invoices']);
+console.log('Bill deletion returns only deducted inventory quantities, aggregates duplicate parts and saves return plus deletion atomically.');

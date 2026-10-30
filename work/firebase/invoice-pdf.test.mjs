@@ -1,0 +1,13 @@
+import fs from 'node:fs';import vm from 'node:vm';import assert from 'node:assert/strict';
+const source=fs.readFileSync(new URL('../design/dist/invoice-pdf.js',import.meta.url),'utf8');let click;const messages=[],shares=[],links=[];const invoice={id:'SP/123',type:'Invoice',kind:'spare-parts',buyer:{name:'Customer',phone:'+91 90000 00000'}};
+const c={File,Blob,document:{addEventListener:(name,fn)=>{if(name==='click')click=fn},createElement:()=>({click(){links.push('download')},remove(){}}),body:{append(){}}},window:{open:(...args)=>links.push(args)},URL:{createObjectURL:()=> 'blob:pdf',revokeObjectURL(){}},navigator:{canShare:d=>d.files[0].type==='application/pdf',share:async d=>shares.push(d)},session:{admin:true,workshopId:'one'},role:'employer',state:{invoices:[invoice],settings:{name:'Workshop'}},invoiceCustomer:i=>i.buyer,openModal:(...args)=>c.modal=args,esc:s=>s,btn:(...args)=>args.join(' '),toast:m=>messages.push(m)};
+vm.createContext(c);vm.runInContext(source+';globalThis.pdfApi={invoicePdfFilename,canShareInvoicePdf,invoicePdfIsCurrent,prepareInvoicePdf};',c);
+assert.equal(c.pdfApi.invoicePdfFilename(invoice),'Spare-parts-bill-SP-123.pdf');
+c.createInvoicePdf=async()=>new File(['%PDF-example'],'bill.pdf',{type:'application/pdf'});
+const button={disabled:false,textContent:'WhatsApp PDF',isConnected:true};await c.pdfApi.prepareInvoicePdf(invoice.id,button);assert.match(c.modal[0],/PDF ready/);assert.equal(button.disabled,false);assert.equal(c.pdfApi.invoicePdfIsCurrent(),true);
+await click({target:{closest:()=>({dataset:{action:'native-share-invoice-pdf'}})}});assert.equal(shares.length,1);assert.equal(shares[0].files[0].type,'application/pdf');
+await click({target:{closest:()=>({dataset:{action:'whatsapp-attach-invoice-pdf'}})}});assert.equal(links[0],'download');assert.match(links[1][0],/^https:\/\/wa.me\/919000000000\?text=/);
+c.session.workshopId='two';assert.equal(c.pdfApi.invoicePdfIsCurrent(),false);await click({target:{closest:()=>({dataset:{action:'download-invoice-pdf'}})}});assert.equal(links.length,2);
+c.session.workshopId='one';c.createInvoicePdf=async()=>{throw new Error('Render failed')};await c.pdfApi.prepareInvoicePdf(invoice.id,button);assert.equal(button.disabled,false);assert.match(messages.at(-1),/Render failed/);
+for(const type of ['Invoice','Estimate'])assert.ok(c.pdfApi.invoicePdfFilename({...invoice,kind:undefined,type}).startsWith(type+'-'));
+console.log('PDF sharing passed: PDF file types, native share, WhatsApp attachment fallback, tenant isolation, safe filenames and generation failure recovery.');

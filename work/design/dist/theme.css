@@ -392,3 +392,14 @@ input[type=file]::file-selector-button { background: var(--surface-alt); color: 
 .parts-sale-line{border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:12px;background:var(--surface-alt);}
 .parts-sale-line>select{width:100%;margin-bottom:9px;}
 @media(max-width:640px){.parts-sale-line .billing-line{grid-template-columns:minmax(0,1fr) 65px 85px 25px;}.parts-sale-line .billing-line input{min-width:0;}.parts-sale-line .billing-line input:first-child{grid-column:1/-1;}}
+
+/* Both bill types use the same invoice line layout and paper template. */
+.parts-sale-line{border:0;border-radius:0;padding:0;margin-bottom:10px;background:transparent;}
+.labour-only .billing-line{grid-template-columns:minmax(0,1fr) 120px 28px;}
+.labour-only [name=lineQty]{display:none;}
+.labour-only [name=lineName]{grid-column:auto;}
+@media(max-width:640px){.labour-only .billing-line{grid-template-columns:minmax(0,1fr) 85px 25px;}}
+.pdf-export{width:718px;background:white;color:#23372B;position:fixed;left:-10000px;top:0;z-index:-1;}
+.pdf-export .document{width:718px;max-width:none;margin:0;padding:20px;box-sizing:border-box;}
+.pdf-export table{width:100%;}
+.pdf-export tr,.pdf-export .doc-total,.pdf-export .doc-sign{break-inside:avoid;}

@@ -96,3 +96,21 @@ console.log('Session restoration passed: owner/employee refresh, saved route, no
  await x.context.api.firebaseBoot();await x.auth(owner,null);x.data(record(),null);
  assert.equal(x.context.page,'Inventory');
 }
+
+// Mobile/browser Back traverses app pages; data refresh does not add history entries.
+{
+ const x=appFixture(),events={},entries=[];let index=-1;
+ x.context.URLSearchParams=URLSearchParams;x.context.query='search';
+ x.context.location={pathname:'/',search:'',hash:''};
+ function apply(entry){x.context.location.hash=entry.url.slice(entry.url.indexOf('#'));x.context.history.state=entry.state;}
+ x.context.history={state:null,replaceState(state,_,url){const entry={state,url};if(index<0){entries.push(entry);index=0;}else entries[index]=entry;apply(entry);},pushState(state,_,url){entries.splice(index+1);entries.push({state,url});index++;apply(entries[index]);}};
+ x.context.window.addEventListener=(name,fn)=>events[name]=fn;
+ vm.runInContext(bridge.slice(bridge.indexOf("window.addEventListener('popstate'"),bridge.indexOf('function hydrate(data)')),x.context);
+ await x.context.api.firebaseBoot();await x.auth(owner,null);x.data(record(),null);
+ assert.equal(entries.length,1);x.context.page='Inventory';x.context.api.render();assert.equal(entries.length,2);
+ x.data(record(),null);x.context.api.render();assert.equal(entries.length,2);
+ index--;apply(entries[index]);events.popstate();assert.equal(x.context.page,'Job cards');assert.equal(x.context.query,'');assert.equal(entries.length,2);
+ index++;apply(entries[index]);events.popstate();assert.equal(x.context.page,'Inventory');assert.equal(entries.length,2);
+ await x.context.api.firebaseBoot();await x.auth(owner,null);x.data(record(),null);assert.equal(x.context.page,'Inventory');assert.equal(entries.length,2);
+}
+console.log('Navigation history passed: Back, Forward, refresh and live updates preserve app pages without duplicate history.');

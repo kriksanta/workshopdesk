@@ -6,7 +6,7 @@ function rememberPage(){
  const saved={page,role,jobFilter};
  try{localStorage.setItem(PAGE_KEY,JSON.stringify(saved));}catch{}
  try{sessionStorage.setItem(PAGE_KEY,JSON.stringify(saved));}catch{}
- try{const route=new URLSearchParams({page,view:role});history.replaceState(null,'',location.pathname+location.search+'#'+route.toString());}catch{}
+ try{const route=new URLSearchParams({page,view:role}),url=location.pathname+location.search+'#'+route.toString(),current=new URLSearchParams(location.hash.slice(1));const changed=current.get('page')!==page||current.get('view')!==role;const entry={...history.state,workshopDeskRoute:true};if(history.state?.workshopDeskRoute&&changed)history.pushState(entry,'',url);else history.replaceState(entry,'',url);}catch{}
 }
 function restorePage(){
  let saved={};
@@ -17,6 +17,13 @@ function restorePage(){
  if(session?.admin)role=saved.role==='employee'?'employee':'employer';
  jobFilter=saved.jobFilter||'All jobs';
 }
+// Back/Forward restores the visible route without creating another history entry or saving data.
+window.addEventListener('popstate',()=>{
+ if(!session||wd.loading||session.platformAdmin)return;
+ const route=new URLSearchParams(location.hash.slice(1));
+ if(!navItems.some(([name])=>name===route.get('page')))return;
+ closeModal();query='';restorePage();renderLocal();rememberPage();
+});
 function hydrate(data){for(const k of Object.keys(state))delete state[k];Object.assign(state,data);wd.baseline=JSON.stringify(state);today=day();}
 function render(){if(wd.loading){renderAuthLoading();return}renderLocal();rememberPage();if(session&&!wd.loading&&!wd.saving&&wd.baseline&&JSON.stringify(state)!==wd.baseline)saveRemote();}
 function busy(value){document.getElementById('sync-mask')?.remove();if(value){const el=document.createElement('div');el.id='sync-mask';el.setAttribute('role','status');el.textContent='Saving workshop changes…';el.style.cssText='position:fixed;inset:0;z-index:99999;background:#fffffff0;display:grid;place-items:center;font:600 18px system-ui;color:#164e46';document.body.append(el)}}

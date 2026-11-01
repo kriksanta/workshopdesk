@@ -6,7 +6,8 @@
       "firebase.json",
       "**/.*",
       "**/node_modules/**",
-      "test.mjs"
+      "test.mjs",
+      "**/*.apk"
     ],
     "headers": [
       {

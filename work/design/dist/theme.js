@@ -21,7 +21,7 @@
     theme = next;
     root.dataset.theme = theme;
     const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.content = theme === 'dark' ? '#1E2B40' : '#E4EAF2';
+    if (meta) meta.content = theme === 'dark' ? '#121F30' : '#D6DFE8';
     if (remember) {
       savedTheme = theme;
       try { localStorage.setItem('theme', theme); } catch {}

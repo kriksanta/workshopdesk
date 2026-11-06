@@ -539,3 +539,20 @@ input,textarea,select,.search{border:1px solid #aebbcc!important;border-radius:6
 :root[data-theme=dark] input,:root[data-theme=dark] select,:root[data-theme=dark] textarea,:root[data-theme=dark] .search{background:#13283b!important;border-color:#40576e!important;color:#eef5ff;box-shadow:inset 0 2px 4px #0006,0 1px #ffffff12;}
 :root[data-theme=dark] .demo-strip{background:linear-gradient(#102436,#20384e);border-color:#3b526a;}
 @media print{.document,.document td,.document th{background:white!important;box-shadow:none!important}.document:after{display:none}}
+
+/* Keep the inventory layout within the phone viewport. */
+.inventory-summary{grid-template-columns:repeat(3,minmax(0,1fr));}
+.inventory-summary .metric{min-width:0;}
+.inventory-summary .metric-title,.inventory-summary .metric-foot{flex-wrap:wrap;}
+.inventory-toolbar{min-width:0;}
+.inventory-table{max-width:100%;min-width:0;overflow-x:auto;}
+@media(max-width:640px){
+.main,.content{min-width:0;}
+.inventory-summary{grid-template-columns:minmax(0,1fr);gap:12px;}
+.inventory-summary .metric{min-height:0;padding:16px;}
+.inventory-summary .metric strong{margin:8px 0;}
+.inventory-toolbar{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;}
+.inventory-toolbar .search,.inventory-toolbar select{width:100%;min-width:0;max-width:none;}
+.inventory-toolbar input{min-width:0;width:100%;}
+.inventory-table td:first-child{white-space:normal;min-width:190px;max-width:260px;overflow-wrap:anywhere;}
+}
